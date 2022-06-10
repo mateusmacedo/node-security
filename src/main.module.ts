@@ -1,5 +1,6 @@
 import { CommonModule } from '@app/common/common.module'
 import { Module } from '@nestjs/common'
+import { AuthModule } from './auth/auth.module'
 
 @Module({
   imports: [
@@ -11,7 +12,8 @@ import { Module } from '@nestjs/common'
         cache: true,
         isGlobal: true
       }
-    })
+    }),
+    AuthModule
   ],
   controllers: [],
   providers: []
