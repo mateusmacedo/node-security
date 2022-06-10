@@ -1,3 +1,4 @@
+import { AuthModule } from '@app/auth/auth.module'
 import { CommonModule } from '@app/common/common.module'
 import { Module } from '@nestjs/common'
 
@@ -11,7 +12,8 @@ import { Module } from '@nestjs/common'
         cache: JSON.parse(process.env.CACHE),
         isGlobal: JSON.parse(process.env.IS_GLOBAL)
       }
-    })
+    }),
+    AuthModule
   ],
   controllers: [],
   providers: []

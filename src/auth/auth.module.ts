@@ -1,4 +1,7 @@
+import { Oauth2Controller } from '@app/auth/oauth/oauth.controller'
 import { Module } from '@nestjs/common'
 
-@Module({})
+@Module({
+  controllers: [Oauth2Controller]
+})
 export class AuthModule {}
