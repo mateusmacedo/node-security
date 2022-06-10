@@ -1,0 +1,107 @@
+version: "3.7"
+services:
+  tempo:
+    image: grafana/tempo:1.0.1
+    container_name: tempo
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./etc/tempo-local.yaml:/etc/tempo.yaml
+    ports:
+      - "14268"      # jaeger ingest, Jaeger - Thrift HTTP
+      - "14250"      # Jaeger - GRPC
+      - "55680"      # OpenTelemetry
+      - "3100"       # tempo
+      - "6831/udp"   # Jaeger - Thrift Compact
+      - "6832/udp"   # Jaeger - Thrift Binary
+
+  loki:
+    image: grafana/loki:2.3.0
+    container_name: loki
+    hostname: loki
+    command: -config.file=/etc/loki/loki-local.yaml
+    ports:
+      - "3100:3100"
+    environment:
+      - JAEGER_AGENT_HOST=tempo
+      - JAEGER_ENDPOINT=http://tempo:14268/api/traces
+      - JAEGER_SAMPLER_TYPE=const
+      - JAEGER_SAMPLER_PARAM=1
+    volumes:
+      - ./etc/loki-local.yaml:/etc/loki/loki-local.yaml
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./etc/prometheus.yaml:/etc/prometheus.yaml
+    entrypoint:
+      - /bin/prometheus
+      - --config.file=/etc/prometheus.yaml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - nestjs-startkit
+
+  grafana:
+    image: grafana/grafana:8.1.0-ubuntu
+    container_name: grafana
+    volumes:
+      - ./data/grafana-data/datasources:/etc/grafana/provisioning/datasources
+      - ./data/grafana-data/dashboards-provisioning:/etc/grafana/provisioning/dashboards
+      - ./data/grafana-data/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    ports:
+      - "3333:3000"
+    depends_on:
+      - prometheus
+      - tempo
+      - loki
+  fluentd:
+    image: grafana/fluent-plugin-loki:master
+    container_name: fluentd
+    command:
+      - "fluentd"
+      - "-v"
+      - "-p"
+      - "/fluentd/plugins"
+    environment:
+      LOKI_URL: http://loki:3100
+    ports:
+      - 24224:24224
+    expose:
+      - 24224
+    deploy:
+      mode: global
+    volumes:
+      - ./etc/fluent.conf:/fluentd/etc/fluent.conf
+      # - /etc/machine-id:/etc/machine-id
+      # - /dev/log:/dev/log
+      # - /var/run/systemd/journal/:/var/run/systemd/journal/
+  nestjs-startkit:
+    image: nestjs-startkit:latest
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile.dev
+    container_name: nestjs-startkit
+    expose:
+      - 3000
+      - 9229
+      - 8081
+    ports:
+      - 3000:3000
+      - 9229:9229
+      - 8081:8081
+    volumes:
+      - ./src:/usr/src/app/src
+      - ./.env:/usr/src/app/.env
+    environment:
+      OTEL_SERVICE_NAME: nestjs-startkit
+      OTEL_EXPORTER_JAEGER_ENDPOINT: http://tempo:14268/api/traces 
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: tcp://host.docker.internal:24224
+        tag: loki

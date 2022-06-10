@@ -1,0 +1,78 @@
+trigger:
+- develop
+
+pool:
+  vmImage: ubuntu-latest
+
+jobs:
+
+  - job: SonarCloud
+    steps:      
+
+    - task: SonarCloudPrepare@1
+      displayName: 'Prepare analysis on SonarCloud'
+      inputs:
+        SonarCloud: SonarCloudQsaude
+        organization: qsaudedevops
+        scannerMode: CLI
+        configMode: manual
+        cliProjectKey: '$(Build.Repository.Name)'
+        cliProjectName: '$(Build.Repository.Name)'
+        cliSources: '$(Build.SourcesDirectory)'
+        extraProperties: |
+         sonar.branch.name=$(BUILD.SOURCEBRANCHNAME)         
+
+    - task: SonarCloudAnalyze@1
+      displayName: 'Run Code Analysis'
+
+    - task: SonarCloudPublish@1
+      displayName: 'Publish Quality Gate Result'
+      continueOnError: false
+
+
+  - job: BuildAndPush
+    steps:
+
+    - task: Docker@2
+      displayName: 'Build docker image'
+      inputs:
+        command: build
+        dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+        buildContext: '$(Build.SourcesDirectory)'
+        repository: $(Build.Repository.Name)
+
+    - task: ECRPushImage@1
+      displayName: 'Push docker image dev'
+      inputs:
+        awsCredentials: 'AWS_ECR_Access'
+        regionName: 'us-east-1'
+        imageSource: 'imagename'
+        sourceImageName: $(Build.Repository.Name)
+        sourceImageTag: $(Build.BuildId)
+        pushTag: $(Build.BuildId)
+        repositoryName: $(Build.Repository.Name)
+        autoCreateRepository: true
+      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+
+  - job: GitOps
+    dependsOn: BuildAndPush
+    condition: succeeded()
+    steps:
+
+    - task: InstallSSHKey@0
+      inputs:
+        knownHostsEntry: 'dev.quesaude.net'
+        sshKeySecureFile: 'gitops-deploy-key'
+      displayName: 'Install SSH Key'
+
+    - script: |
+        git clone git@ssh.dev.azure.com:v3/QsaudeDevOps/GitOps%20AWS/gitops-aws
+        cd gitops-aws
+        sed -E -i "s/(image:).*/\1\ 790266467241.dkr.ecr.us-east-1.amazonaws.com\/$(Build.Repository.Name):$(Build.BuildId)/" deployments/dev/$(Build.Repository.Name)/deployment.yaml
+        git add deployments/dev/$(Build.Repository.Name)/deployment.yaml
+        git config --global user.email "gitops@qsaude.com.br"
+        git config --global user.name "GitOps"
+        git commit -m "[gitops-auto]"
+        git push
+      displayName: 'GitOps Dev'
+      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
