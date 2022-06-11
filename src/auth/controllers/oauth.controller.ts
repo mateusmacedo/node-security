@@ -1,6 +1,6 @@
 import { OAuth2Request, OAuth2Response } from '@app/auth/dto'
 import { Oauth2GrantStrategyRegistryService } from '@app/auth/strategies'
-import { Controller, Post, Query } from '@nestjs/common'
+import { Controller, InternalServerErrorException, Post, Query } from '@nestjs/common'
 
 @Controller('oauth2')
 export class Oauth2Controller {
@@ -8,9 +8,13 @@ export class Oauth2Controller {
 
   @Post('token')
   async token(@Query() request: OAuth2Request): Promise<OAuth2Response> {
-    if (!(await this.grantStrategyRegistry.validate(request))) {
-      throw new Error('Invalid grant type')
+    try {
+      if (!(await this.grantStrategyRegistry.validate(request))) {
+        throw new Error('Invalid grant type')
+      }
+      return undefined
+    } catch (err) {
+      throw new InternalServerErrorException()
     }
-    return undefined
   }
 }
