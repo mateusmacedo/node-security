@@ -1,10 +1,10 @@
 import { Oauth2Controller } from '@app/auth/controllers'
-import { OAuth2Request, OAuth2Response } from '@app/auth/dto'
+import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
 import { GrantType } from '@app/auth/enums'
 import { Oauth2GrantStrategyInterface } from '@app/auth/interfaces'
 import { Oauth2GrantStrategyRegistryService } from '@app/auth/strategies'
 import { createMock } from '@golevelup/nestjs-testing'
-import { InternalServerErrorException } from '@nestjs/common'
+import { BadRequestException, InternalServerErrorException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 
 describe('OauthController', () => {
@@ -46,19 +46,13 @@ describe('OauthController', () => {
     })
     it('should throw a error when cannot validate grant type', async () => {
       strategyRegistry.validate = jest.fn().mockResolvedValue(undefined)
-      await expect(sut.token(request)).rejects.toThrow()
+      await expect(sut.token(request)).rejects.toThrow(new BadRequestException('Invalid grant type'))
     })
     it('should throw a error if strategyRegistry throws', async () => {
       strategyRegistry.validate = jest.fn().mockImplementationOnce(() => {
-        throw new Error('error')
+        throw new Error()
       })
-      await expect(sut.token(request)).rejects.toThrow()
-    })
-    it('should throw a internal error if error to occur', async () => {
-      strategyRegistry.validate = jest.fn().mockImplementationOnce(() => {
-        throw new Error('error')
-      })
-      await expect(sut.token(request)).rejects.toThrow(InternalServerErrorException)
+      await expect(sut.token(request)).rejects.toThrow(new InternalServerErrorException('We have a problem'))
     })
     it('should get oauth2 response', async () => {
       request = createMock<OAuth2Request>({
