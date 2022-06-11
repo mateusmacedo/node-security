@@ -2,6 +2,7 @@ import { Oauth2Controller } from '@app/auth/controllers'
 import { OAuth2Request } from '@app/auth/dto'
 import { Oauth2GrantStrategyRegistryService } from '@app/auth/strategies'
 import { createMock } from '@golevelup/nestjs-testing'
+import { InternalServerErrorException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 
 describe('OauthController', () => {
@@ -46,6 +47,12 @@ describe('OauthController', () => {
         throw new Error('error')
       })
       await expect(sut.token(request)).rejects.toThrow()
+    })
+    it('should throw a internal error if error to occur', async () => {
+      strategyRegistry.validate = jest.fn().mockImplementationOnce(() => {
+        throw new Error('error')
+      })
+      await expect(sut.token(request)).rejects.toThrow(InternalServerErrorException)
     })
   })
 })
