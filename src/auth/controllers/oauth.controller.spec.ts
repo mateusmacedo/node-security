@@ -2,14 +2,14 @@ import { Oauth2Controller } from '@app/auth/controllers'
 import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
 import { GrantType } from '@app/auth/enums'
 import { Oauth2GrantStrategyInterface } from '@app/auth/interfaces'
-import { Oauth2GrantStrategyRegistryService } from '@app/auth/strategies'
+import { Oauth2GrantStrategyRegistry } from '@app/auth/strategies'
 import { createMock } from '@golevelup/nestjs-testing'
 import { BadRequestException, InternalServerErrorException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 
 describe('OauthController', () => {
   let sut: Oauth2Controller
-  let strategyRegistry: Oauth2GrantStrategyRegistryService
+  let strategyRegistry: Oauth2GrantStrategyRegistry
   let request: OAuth2Request
   let response: OAuth2Response
   let strategy: Oauth2GrantStrategyInterface
@@ -17,16 +17,16 @@ describe('OauthController', () => {
     jest.clearAllMocks()
     response = new OAuth2Response('accessToken', 'refreshToken', 1, 1, 'scope')
     strategy = createMock<Oauth2GrantStrategyInterface>()
-    strategyRegistry = createMock<Oauth2GrantStrategyRegistryService>({
+    strategyRegistry = createMock<Oauth2GrantStrategyRegistry>({
       validate: jest.fn().mockResolvedValue(true),
       getOauth2Response: jest.fn().mockResolvedValue(response)
     })
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [Oauth2GrantStrategyRegistryService],
+      providers: [Oauth2GrantStrategyRegistry],
       controllers: [Oauth2Controller]
     })
-      .overrideProvider(Oauth2GrantStrategyRegistryService)
+      .overrideProvider(Oauth2GrantStrategyRegistry)
       .useValue(strategyRegistry)
       .compile()
 
