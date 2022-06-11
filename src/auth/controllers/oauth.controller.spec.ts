@@ -11,8 +11,8 @@ describe('OauthController', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks()
-    const strategyRegistryMock = createMock<Oauth2GrantStrategyRegistryService>({
-      validate: jest.fn().mockResolvedValue(undefined)
+    strategyRegistry = createMock<Oauth2GrantStrategyRegistryService>({
+      validate: jest.fn().mockResolvedValue(true)
     })
 
     const module: TestingModule = await Test.createTestingModule({
@@ -20,11 +20,10 @@ describe('OauthController', () => {
       controllers: [Oauth2Controller]
     })
       .overrideProvider(Oauth2GrantStrategyRegistryService)
-      .useValue(strategyRegistryMock)
+      .useValue(strategyRegistry)
       .compile()
 
     sut = module.get<Oauth2Controller>(Oauth2Controller)
-    strategyRegistry = module.get<Oauth2GrantStrategyRegistryService>(Oauth2GrantStrategyRegistryService)
   })
 
   it('should be defined', () => {
@@ -37,6 +36,10 @@ describe('OauthController', () => {
       await sut.token(request)
       expect(strategyRegistry.validate).toHaveBeenCalledTimes(1)
       expect(strategyRegistry.validate).toHaveBeenCalledWith(request)
+    })
+    it('should throw a error when cannot validate grant type', async () => {
+      strategyRegistry.validate = jest.fn().mockResolvedValue(undefined)
+      await expect(sut.token(request)).rejects.toThrow()
     })
   })
 })
