@@ -41,5 +41,11 @@ describe('OauthController', () => {
       strategyRegistry.validate = jest.fn().mockResolvedValue(undefined)
       await expect(sut.token(request)).rejects.toThrow()
     })
+    it('should throw a error if strategyRegistry throws', async () => {
+      strategyRegistry.validate = jest.fn().mockImplementationOnce(() => {
+        throw new Error('error')
+      })
+      await expect(sut.token(request)).rejects.toThrow()
+    })
   })
 })
