@@ -8,6 +8,7 @@ export class Oauth2Controller {
 
   @Post('token')
   async token(@Query() request: OAuth2Request): Promise<OAuth2Response> {
+    await this.grantStrategyRegistry.validate(request)
     return undefined
   }
 }
