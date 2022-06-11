@@ -8,7 +8,9 @@ export class Oauth2Controller {
 
   @Post('token')
   async token(@Query() request: OAuth2Request): Promise<OAuth2Response> {
-    await this.grantStrategyRegistry.validate(request)
+    if (!(await this.grantStrategyRegistry.validate(request))) {
+      throw new Error('Invalid grant type')
+    }
     return undefined
   }
 }
