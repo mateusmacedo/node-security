@@ -1,5 +1,7 @@
 import { Oauth2Controller } from '@app/auth/controllers'
-import { OAuth2Request } from '@app/auth/dto'
+import { OAuth2Request, OAuth2Response } from '@app/auth/dto'
+import { GrantType } from '@app/auth/enums'
+import { Oauth2GrantStrategyInterface } from '@app/auth/interfaces'
 import { Oauth2GrantStrategyRegistryService } from '@app/auth/strategies'
 import { createMock } from '@golevelup/nestjs-testing'
 import { InternalServerErrorException } from '@nestjs/common'
@@ -9,11 +11,15 @@ describe('OauthController', () => {
   let sut: Oauth2Controller
   let strategyRegistry: Oauth2GrantStrategyRegistryService
   let request: OAuth2Request
-
+  let response: OAuth2Response
+  let strategy: Oauth2GrantStrategyInterface
   beforeEach(async () => {
     jest.clearAllMocks()
+    response = new OAuth2Response('accessToken', 'refreshToken', 1, 1, 'scope')
+    strategy = createMock<Oauth2GrantStrategyInterface>()
     strategyRegistry = createMock<Oauth2GrantStrategyRegistryService>({
-      validate: jest.fn().mockResolvedValue(true)
+      validate: jest.fn().mockResolvedValue(true),
+      getOauth2Response: jest.fn().mockResolvedValue(response)
     })
 
     const module: TestingModule = await Test.createTestingModule({
@@ -53,6 +59,17 @@ describe('OauthController', () => {
         throw new Error('error')
       })
       await expect(sut.token(request)).rejects.toThrow(InternalServerErrorException)
+    })
+    it('should get oauth2 response', async () => {
+      request = createMock<OAuth2Request>({
+        grantType: GrantType.PASSWORD
+      })
+      strategyRegistry['registry'] = { [GrantType.PASSWORD]: strategy }
+      const strategySpy = jest.spyOn(strategyRegistry, 'getOauth2Response').mockResolvedValue(response)
+      const result = await sut.token(request)
+      expect(strategySpy).toHaveBeenCalledTimes(1)
+      expect(strategySpy).toHaveBeenCalledWith(request)
+      expect(result).toBeInstanceOf(OAuth2Response)
     })
   })
 })
