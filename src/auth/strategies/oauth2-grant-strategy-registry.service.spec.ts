@@ -7,6 +7,8 @@ import { createMock } from '@golevelup/nestjs-testing'
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 
+import { InvalidGrantTypeException } from './../errors/invalid-grant-type.exception'
+
 @Injectable()
 @Oauth2GrantStrategy(GrantType.CLIENT_CREDENTIALS)
 class Oauth2GrantStrategyStub implements Oauth2GrantStrategyInterface {
@@ -14,7 +16,9 @@ class Oauth2GrantStrategyStub implements Oauth2GrantStrategyInterface {
     return request.grantType === GrantType.CLIENT_CREDENTIALS
   }
   async getOauth2Response(request: OAuth2Request): Promise<OAuth2Response> {
-    throw new Error('Method not implemented.')
+    return request.grantType === GrantType.CLIENT_CREDENTIALS
+      ? new OAuth2Response('access_token', 'refresh_token', 1, 1, 'scope')
+      : Promise.reject(new InvalidGrantTypeException())
   }
 }
 
@@ -92,7 +96,19 @@ describe('Oauth2GrantStrategyRegistryService', () => {
       const request = createMock<OAuth2Request>({
         grantType: GrantType.PASSWORD
       })
-      await expect(service.validate(request)).rejects.toThrow(BadRequestException)
+      await expect(service.getOauth2Response(request)).rejects.toThrow(BadRequestException)
+    })
+    it('should return a response when success', async () => {
+      const request = createMock<OAuth2Request>({
+        grantType: GrantType.CLIENT_CREDENTIALS
+      })
+      const { strategies } = explorer.explore()
+      service.register(strategies)
+      const strategySpy = jest.spyOn(service['registry'][GrantType.CLIENT_CREDENTIALS], 'getOauth2Response')
+      const result = await service.getOauth2Response(request)
+      expect(result).toBeInstanceOf(OAuth2Response)
+      expect(strategySpy).toHaveBeenCalledTimes(1)
+      expect(strategySpy).toHaveBeenCalledWith(request)
     })
   })
 })

@@ -24,7 +24,7 @@ export class Oauth2GrantStrategyRegistry {
     this.registry[strategyName] = instance
   }
 
-  register(strategies: Oauth2GrantStrategyType[] = []) {
+  register(strategies: Oauth2GrantStrategyType[]) {
     strategies.forEach((strategy) => this.registerStrategy(strategy))
   }
 
