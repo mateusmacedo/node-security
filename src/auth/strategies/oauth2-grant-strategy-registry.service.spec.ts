@@ -18,11 +18,12 @@ class Oauth2GrantStrategyStub implements Oauth2GrantStrategyInterface {
 }
 
 describe('Oauth2GrantStrategyRegistryService', () => {
-  let sut: Oauth2GrantStrategyRegistry
+  let service: Oauth2GrantStrategyRegistry
   let explorer: StrategyExplorer
+  let module: TestingModule
   beforeEach(async () => {
     jest.clearAllMocks()
-    const module: TestingModule = await Test.createTestingModule({
+    module = await Test.createTestingModule({
       providers: [
         {
           provide: StrategyExplorer,
@@ -37,19 +38,25 @@ describe('Oauth2GrantStrategyRegistryService', () => {
       ]
     }).compile()
 
-    sut = module.get<Oauth2GrantStrategyRegistry>(Oauth2GrantStrategyRegistry)
+    service = module.get<Oauth2GrantStrategyRegistry>(Oauth2GrantStrategyRegistry)
     explorer = module.get<StrategyExplorer>(StrategyExplorer)
   })
 
   it('should be defined', () => {
-    expect(sut).toBeDefined()
+    expect(service).toBeDefined()
   })
   describe('register', () => {
     it('should register a grant strategy', () => {
       const { strategies } = explorer.explore()
-      sut.register(strategies)
-      const test = sut['registry']
+      service.register(strategies)
+      const test = service['registry']
       expect(test.client_credentials).toBeDefined()
+    })
+    it('should no have strategies registered', () => {
+      jest.spyOn(service['moduleRef'], 'get').mockReturnValue(undefined)
+      service.register([Oauth2GrantStrategyStub])
+      const test = service['registry']
+      expect(test).toEqual({})
     })
   })
 })
