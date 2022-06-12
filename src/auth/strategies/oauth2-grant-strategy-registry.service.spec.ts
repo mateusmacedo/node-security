@@ -1,4 +1,5 @@
 import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
+import { GrantType } from '@app/auth/enums'
 import { Oauth2GrantStrategyInterface } from '@app/auth/interfaces'
 import { Oauth2GrantStrategyRegistry, StrategyExplorer } from '@app/auth/strategies'
 import { Oauth2GrantStrategy } from '@app/auth/strategies/decorator/oauth2-grant-strategy.decorator'
@@ -7,12 +8,12 @@ import { BadRequestException, Injectable } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 
 @Injectable()
-@Oauth2GrantStrategy('client_credentials')
+@Oauth2GrantStrategy(GrantType.CLIENT_CREDENTIALS)
 class Oauth2GrantStrategyStub implements Oauth2GrantStrategyInterface {
-  validate(request: OAuth2Request): Promise<boolean> {
-    throw new Error('Method not implemented.')
+  async validate(request: OAuth2Request): Promise<boolean> {
+    return request.grantType === GrantType.CLIENT_CREDENTIALS
   }
-  getOauth2Response(request: OAuth2Request): Promise<OAuth2Response> {
+  async getOauth2Response(request: OAuth2Request): Promise<OAuth2Response> {
     throw new Error('Method not implemented.')
   }
 }
@@ -72,6 +73,18 @@ describe('Oauth2GrantStrategyRegistryService', () => {
     it('should throw a error when not have a registered strategy', async () => {
       const request = createMock<OAuth2Request>()
       await expect(service.validate(request)).rejects.toThrow(BadRequestException)
+    })
+    it('should validate when has a strategy registered', async () => {
+      const strategySpy = jest.spyOn(Oauth2GrantStrategyStub.prototype, 'validate')
+      const { strategies } = explorer.explore()
+      service.register(strategies)
+      const request = createMock<OAuth2Request>({
+        grantType: GrantType.CLIENT_CREDENTIALS
+      })
+      const result = await service.validate(request)
+      expect(result).toBeTruthy()
+      expect(strategySpy).toHaveBeenCalledTimes(1)
+      expect(strategySpy).toHaveBeenCalledWith(request)
     })
   })
 })
