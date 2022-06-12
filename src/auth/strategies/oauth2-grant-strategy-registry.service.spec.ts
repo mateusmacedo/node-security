@@ -47,16 +47,25 @@ describe('Oauth2GrantStrategyRegistryService', () => {
   })
   describe('register', () => {
     it('should register a grant strategy', () => {
+      const registerStrategySpy = jest.spyOn(Oauth2GrantStrategyRegistry.prototype as any, 'registerStrategy')
+      const getSpy = jest.spyOn(service['moduleRef'], 'get')
+      const reflectStrategyNameSpy = jest.spyOn(Oauth2GrantStrategyRegistry.prototype as any, 'reflectStrategyName')
       const { strategies } = explorer.explore()
       service.register(strategies)
-      const test = service['registry']
-      expect(test.client_credentials).toBeDefined()
+      expect(service['registry'].client_credentials).toBeDefined()
+      expect(registerStrategySpy).toHaveBeenCalledTimes(1)
+      expect(registerStrategySpy).toHaveBeenCalledWith(Oauth2GrantStrategyStub)
+      expect(getSpy).toHaveBeenCalledTimes(1)
+      expect(getSpy).toHaveBeenCalledWith(Oauth2GrantStrategyStub, { strict: false })
+      expect(reflectStrategyNameSpy).toHaveBeenCalledTimes(1)
+      expect(reflectStrategyNameSpy).toHaveBeenCalledWith(Oauth2GrantStrategyStub)
     })
     it('should no have strategies registered', () => {
-      jest.spyOn(service['moduleRef'], 'get').mockReturnValue(undefined)
+      const getSpy = jest.spyOn(service['moduleRef'], 'get').mockReturnValue(undefined)
       service.register([Oauth2GrantStrategyStub])
-      const test = service['registry']
-      expect(test).toEqual({})
+      expect(service['registry']).toEqual({})
+      expect(getSpy).toHaveBeenCalledTimes(1)
+      expect(getSpy).toHaveBeenCalledWith(Oauth2GrantStrategyStub, { strict: false })
     })
   })
 })
