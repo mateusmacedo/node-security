@@ -3,7 +3,7 @@ import { Oauth2GrantStrategyInterface } from '@app/auth/interfaces'
 import { Oauth2GrantStrategyRegistry, StrategyExplorer } from '@app/auth/strategies'
 import { Oauth2GrantStrategy } from '@app/auth/strategies/decorator/oauth2-grant-strategy.decorator'
 import { createMock } from '@golevelup/nestjs-testing'
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 
 @Injectable()
@@ -66,6 +66,12 @@ describe('Oauth2GrantStrategyRegistryService', () => {
       expect(service['registry']).toEqual({})
       expect(getSpy).toHaveBeenCalledTimes(1)
       expect(getSpy).toHaveBeenCalledWith(Oauth2GrantStrategyStub, { strict: false })
+    })
+  })
+  describe('validate', () => {
+    it('should throw a error when not have a registered strategy', async () => {
+      const request = createMock<OAuth2Request>()
+      await expect(service.validate(request)).rejects.toThrow(BadRequestException)
     })
   })
 })
