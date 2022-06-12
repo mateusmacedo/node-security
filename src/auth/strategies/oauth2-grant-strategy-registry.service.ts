@@ -2,7 +2,7 @@ import { OAUTH2_STRATEGY_METADATA } from '@app/auth/constants'
 import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
 import { Oauth2GrantStrategyInterface } from '@app/auth/interfaces'
 import { Oauth2GrantStrategyType } from '@app/auth/types'
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
 
 @Injectable()
@@ -29,7 +29,10 @@ export class Oauth2GrantStrategyRegistry {
   }
 
   async validate(request: OAuth2Request): Promise<boolean> {
-    throw Error('Method not implemented.')
+    if (!(request.grantType in this.registry)) {
+      throw new BadRequestException(`Cannot find the a strategy for the grant type "${request.grantType}"`)
+    }
+    return undefined
   }
 
   async getOauth2Response(request: OAuth2Request): Promise<OAuth2Response> {
