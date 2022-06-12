@@ -36,6 +36,9 @@ export class Oauth2GrantStrategyRegistry {
   }
 
   async getOauth2Response(request: OAuth2Request): Promise<OAuth2Response> {
+    if (!(request.grantType in this.registry)) {
+      throw new BadRequestException(`Cannot find the a strategy for the grant type "${request.grantType}"`)
+    }
     throw new Error('Method not implemented.')
   }
 }
