@@ -87,4 +87,12 @@ describe('Oauth2GrantStrategyRegistryService', () => {
       expect(strategySpy).toHaveBeenCalledWith(request)
     })
   })
+  describe('getOauth2Response', () => {
+    it('should throw a error when no have strategies registered for grant type', async () => {
+      const request = createMock<OAuth2Request>({
+        grantType: GrantType.PASSWORD
+      })
+      await expect(service.validate(request)).rejects.toThrow(BadRequestException)
+    })
+  })
 })
