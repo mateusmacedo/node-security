@@ -6,11 +6,11 @@ import { Module } from '@nestjs/common'
   imports: [
     CommonModule.register({
       configModule: {
-        ignoreEnvFile: JSON.parse(process.env.IGNORE_ENV_FILE),
-        envFilePath: JSON.parse(process.env.ENV_FILE_PATH),
-        expandVariables: JSON.parse(process.env.EXPAND_VARIABLES),
-        cache: JSON.parse(process.env.CACHE),
-        isGlobal: JSON.parse(process.env.IS_GLOBAL)
+        ignoreEnvFile: process.env.NODE_ENV === 'production',
+        envFilePath: process.env.ENV_FILE_PATH,
+        expandVariables: process.env.NODE_ENV === 'production',
+        cache: process.env.NODE_ENV === 'production',
+        isGlobal: true
       }
     }),
     AuthModule
