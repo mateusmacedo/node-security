@@ -4,8 +4,9 @@ import { GrantType } from '@app/auth/enums'
 import { InvalidGrantTypeException } from '@app/auth/errors/invalid-grant-type.exception'
 import { Oauth2StrategyNotFoundException } from '@app/auth/exceptions'
 import { Oauth2GrantStrategyInterface } from '@app/auth/interfaces'
-import { Oauth2GrantStrategyRegistry, StrategyExplorer } from '@app/auth/strategies'
+import { Oauth2GrantStrategyRegistry } from '@app/auth/strategies'
 import { Oauth2GrantStrategy } from '@app/auth/strategies/decorator/oauth2-grant-strategy.decorator'
+import { StrategyExplorerService } from '@app/common/services'
 import { createMock } from '@golevelup/nestjs-testing'
 import { Injectable } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
@@ -25,15 +26,15 @@ class Oauth2GrantStrategyStub implements Oauth2GrantStrategyInterface {
 
 describe('Oauth2GrantStrategyRegistryService', () => {
   let service: Oauth2GrantStrategyRegistry
-  let explorer: StrategyExplorer
+  let explorer: StrategyExplorerService
   let module: TestingModule
   beforeEach(async () => {
     jest.clearAllMocks()
     module = await Test.createTestingModule({
       providers: [
         {
-          provide: StrategyExplorer,
-          useValue: createMock<StrategyExplorer>({
+          provide: StrategyExplorerService,
+          useValue: createMock<StrategyExplorerService>({
             explore: jest.fn().mockReturnValue([Oauth2GrantStrategyStub])
           })
         },
@@ -42,7 +43,7 @@ describe('Oauth2GrantStrategyRegistryService', () => {
       ]
     }).compile()
     service = module.get<Oauth2GrantStrategyRegistry>(Oauth2GrantStrategyRegistry)
-    explorer = module.get<StrategyExplorer>(StrategyExplorer)
+    explorer = module.get<StrategyExplorerService>(StrategyExplorerService)
     service.register(explorer.explore<Oauth2GrantStrategyInterface>(OAUTH2_STRATEGY_METADATA))
   })
 
