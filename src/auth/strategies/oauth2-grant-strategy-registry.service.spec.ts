@@ -1,6 +1,7 @@
 import { OAUTH2_STRATEGY_METADATA } from '@app/auth/constants'
 import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
 import { GrantType } from '@app/auth/enums'
+import { InvalidGrantTypeException } from '@app/auth/errors/invalid-grant-type.exception'
 import { Oauth2StrategyNotFoundException } from '@app/auth/exceptions'
 import { Oauth2GrantStrategyInterface } from '@app/auth/interfaces'
 import { Oauth2GrantStrategyRegistry, StrategyExplorer } from '@app/auth/strategies'
@@ -8,8 +9,6 @@ import { Oauth2GrantStrategy } from '@app/auth/strategies/decorator/oauth2-grant
 import { createMock } from '@golevelup/nestjs-testing'
 import { Injectable } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
-
-import { InvalidGrantTypeException } from './../errors/invalid-grant-type.exception'
 
 @Injectable()
 @Oauth2GrantStrategy(GrantType.CLIENT_CREDENTIALS)
@@ -35,18 +34,16 @@ describe('Oauth2GrantStrategyRegistryService', () => {
         {
           provide: StrategyExplorer,
           useValue: createMock<StrategyExplorer>({
-            explore: jest.fn().mockReturnValue({
-              strategies: [Oauth2GrantStrategyStub]
-            })
+            explore: jest.fn().mockReturnValue([Oauth2GrantStrategyStub])
           })
         },
         Oauth2GrantStrategyStub,
         Oauth2GrantStrategyRegistry
       ]
     }).compile()
-
     service = module.get<Oauth2GrantStrategyRegistry>(Oauth2GrantStrategyRegistry)
     explorer = module.get<StrategyExplorer>(StrategyExplorer)
+    service.register(explorer.explore<Oauth2GrantStrategyInterface>(OAUTH2_STRATEGY_METADATA))
   })
 
   it('should be defined', () => {
@@ -54,10 +51,9 @@ describe('Oauth2GrantStrategyRegistryService', () => {
   })
   describe('register', () => {
     it('should register a grant strategy', () => {
-      const reflect = jest.spyOn(Reflect, 'getMetadata')
-      const { strategies } = explorer.explore()
       const getSpy = jest.spyOn(service['moduleRef'], 'get')
-      service.register(strategies)
+      const reflect = jest.spyOn(Reflect, 'getMetadata')
+      service.register(explorer.explore(OAUTH2_STRATEGY_METADATA))
       expect(service['registry'].client_credentials).toBeDefined()
       expect(getSpy).toHaveBeenCalledTimes(1)
       expect(getSpy).toHaveBeenCalledWith(Oauth2GrantStrategyStub, { strict: false })
@@ -65,6 +61,7 @@ describe('Oauth2GrantStrategyRegistryService', () => {
       expect(reflect).toHaveBeenCalledWith(OAUTH2_STRATEGY_METADATA, Oauth2GrantStrategyStub)
     })
     it('should no have strategies registered', () => {
+      service['registry'] = {}
       const getSpy = jest.spyOn(service['moduleRef'], 'get').mockReturnValue(undefined)
       service.register([Oauth2GrantStrategyStub])
       expect(service['registry']).toEqual({})
@@ -74,13 +71,13 @@ describe('Oauth2GrantStrategyRegistryService', () => {
   })
   describe('validate', () => {
     it('should throw a error when not have a registered strategy', async () => {
-      const request = createMock<OAuth2Request>()
+      const request = createMock<OAuth2Request>({
+        grantType: GrantType.PASSWORD
+      })
       await expect(service.validate(request)).rejects.toThrow(Oauth2StrategyNotFoundException)
     })
     it('should validate when has a strategy registered', async () => {
       const strategySpy = jest.spyOn(Oauth2GrantStrategyStub.prototype, 'validate')
-      const { strategies } = explorer.explore()
-      service.register(strategies)
       const request = createMock<OAuth2Request>({
         grantType: GrantType.CLIENT_CREDENTIALS
       })
@@ -98,12 +95,10 @@ describe('Oauth2GrantStrategyRegistryService', () => {
       await expect(service.getOauth2Response(request)).rejects.toThrow(Oauth2StrategyNotFoundException)
     })
     it('should return a response when success', async () => {
+      const strategySpy = jest.spyOn(service['registry'][GrantType.CLIENT_CREDENTIALS], 'getOauth2Response')
       const request = createMock<OAuth2Request>({
         grantType: GrantType.CLIENT_CREDENTIALS
       })
-      const { strategies } = explorer.explore()
-      service.register(strategies)
-      const strategySpy = jest.spyOn(service['registry'][GrantType.CLIENT_CREDENTIALS], 'getOauth2Response')
       const result = await service.getOauth2Response(request)
       expect(result).toBeInstanceOf(OAuth2Response)
       expect(strategySpy).toHaveBeenCalledTimes(1)
