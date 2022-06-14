@@ -1,25 +1,28 @@
 import { OAUTH2_STRATEGY_METADATA } from '@app/auth/constants'
 import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
 import { Oauth2StrategyNotFoundException } from '@app/auth/exceptions'
-import { Oauth2GrantStrategyInterface } from '@app/auth/interfaces'
-import { Oauth2GrantStrategyType } from '@app/auth/types'
+import { Oauth2GrantStrategyInterface, StrategyRegistry } from '@app/auth/interfaces'
+import { AbstractGrantStrategy } from '@app/auth/strategies'
 import { Injectable } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
 
 @Injectable()
-export class Oauth2GrantStrategyRegistry {
+export class Oauth2GrantStrategyRegistry implements StrategyRegistry, Oauth2GrantStrategyInterface {
   private registry: { [s: string]: Oauth2GrantStrategyInterface } = {}
 
-  constructor(private readonly moduleRef: ModuleRef) {}
+  constructor(protected readonly moduleRef: ModuleRef) {}
 
-  register(strategies: Oauth2GrantStrategyType[]) {
-    strategies.forEach((strategy) => {
-      const instance: Oauth2GrantStrategyInterface = this.moduleRef.get(strategy, { strict: false })
+  register<Oauth2GrantStrategyInterface>(strategies: Oauth2GrantStrategyInterface[]): void {
+    strategies.forEach((strategy: Oauth2GrantStrategyInterface) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const instance = this.moduleRef.get(strategy as any, {
+        strict: false
+      })
       if (!instance) {
         return
       }
       const strategyName = Reflect.getMetadata(OAUTH2_STRATEGY_METADATA, strategy)
-      this.registry[strategyName] = instance
+      this.registry[strategyName] = instance as AbstractGrantStrategy
     })
   }
 
