@@ -8,14 +8,19 @@ import { Test } from '@nestjs/testing'
 describe('ClientCredentialGrantStrategyService', () => {
   let clientCredentialStrategy: ClientCredentialGrantStrategyService
   let identityProvider: IdentityProviderService
+  let request: OAuth2Request
 
   beforeEach(async () => {
     jest.clearAllMocks()
+    request = {
+      grantType: GrantType.CLIENT_CREDENTIALS,
+      clientId: 'client-id',
+      clientSecret: 'client-secret',
+      identityContext: IdentityContext.AP,
+      scopes: ['scope-1', 'scope-2']
+    }
     identityProvider = createMock<IdentityProviderService>({
-      identifyClient: jest.fn().mockResolvedValue({
-        clientId: 'client-id',
-        clientSecret: 'client-secret'
-      })
+      identifyClient: jest.fn().mockResolvedValue(request)
     })
     const moduleRef = await Test.createTestingModule({
       imports: [],
@@ -41,38 +46,16 @@ describe('ClientCredentialGrantStrategyService', () => {
   describe('validate', () => {
     it('should identify client on provider', async () => {
       const providerSpy = jest.spyOn(identityProvider, 'identifyClient')
-      const request = createMock<OAuth2Request>({
-        grantType: GrantType.CLIENT_CREDENTIALS,
-        clientId: 'client-id',
-        clientSecret: 'client-secret',
-        identityContext: IdentityContext.AP
-      })
       await clientCredentialStrategy.validate(request)
       expect(providerSpy).toBeCalledTimes(1)
-      expect(providerSpy).toBeCalledWith({
-        clientId: request.clientId,
-        clientSecret: request.clientSecret,
-        identityContext: request.identityContext
-      })
+      expect(providerSpy).toBeCalledWith({ clientId: request.clientId, identityContext: request.identityContext })
     })
     it('should throw error when provider throws', async () => {
       jest.spyOn(identityProvider, 'identifyClient').mockRejectedValue(new Error('error'))
-      const request = createMock<OAuth2Request>({
-        grantType: GrantType.CLIENT_CREDENTIALS,
-        clientId: 'client-id',
-        clientSecret: 'client-secret',
-        identityContext: IdentityContext.AP
-      })
       await expect(clientCredentialStrategy.validate(request)).rejects.toThrow()
     })
     it('should throw a error if client not found', async () => {
       jest.spyOn(identityProvider, 'identifyClient').mockResolvedValue(null)
-      const request = createMock<OAuth2Request>({
-        grantType: GrantType.CLIENT_CREDENTIALS,
-        clientId: 'client-id',
-        clientSecret: 'client-secret',
-        identityContext: IdentityContext.AP
-      })
       await expect(clientCredentialStrategy.validate(request)).rejects.toThrow()
     })
   })
