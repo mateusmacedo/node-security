@@ -49,7 +49,11 @@ describe('ClientCredentialGrantStrategyService', () => {
       })
       await clientCredentialStrategy.validate(request)
       expect(providerSpy).toBeCalledTimes(1)
-      expect(providerSpy).toBeCalledWith('client-id')
+      expect(providerSpy).toBeCalledWith({
+        clientId: request.clientId,
+        clientSecret: request.clientSecret,
+        identityContext: request.identityContext
+      })
     })
   })
 })

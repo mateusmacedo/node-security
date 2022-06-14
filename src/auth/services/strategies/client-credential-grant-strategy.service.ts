@@ -9,7 +9,8 @@ export class ClientCredentialGrantStrategyService extends AbstractGrantStrategy 
     super()
   }
   async validate(request: OAuth2Request): Promise<boolean> {
-    await this.identityProvider.identifyClient(request.clientId)
+    const { clientId, clientSecret, identityContext } = request
+    await this.identityProvider.identifyClient({ clientId, clientSecret, identityContext })
     return true
   }
   getOauth2Response(request: OAuth2Request): Promise<OAuth2Response> {
