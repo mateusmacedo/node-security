@@ -1,6 +1,6 @@
 import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
 import { InvalidGrantTypeException } from '@app/auth/errors'
-import { Oauth2GrantStrategyRegistry } from '@app/auth/strategies'
+import { Oauth2GrantStrategyRegistry } from '@app/auth/services'
 import { Controller, InternalServerErrorException, Post, Query } from '@nestjs/common'
 
 @Controller('oauth2')

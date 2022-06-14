@@ -1,5 +1,5 @@
 import { Oauth2Controller } from '@app/auth/controllers/oauth.controller'
-import { Oauth2GrantStrategyRegistry } from '@app/auth/strategies'
+import { Oauth2GrantStrategyRegistry } from '@app/auth/services/strategies'
 import { Module } from '@nestjs/common'
 
 @Module({

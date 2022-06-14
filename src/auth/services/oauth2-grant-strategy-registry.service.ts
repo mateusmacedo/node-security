@@ -2,7 +2,7 @@ import { OAUTH2_STRATEGY_METADATA } from '@app/auth/constants'
 import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
 import { Oauth2StrategyNotFoundException } from '@app/auth/exceptions'
 import { Oauth2GrantStrategyInterface, StrategyRegistry } from '@app/auth/interfaces'
-import { AbstractGrantStrategy } from '@app/auth/strategies'
+import { AbstractGrantStrategy } from '@app/auth/services/strategies'
 import { Injectable } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
 
