@@ -1,3 +1,4 @@
+import { IdentityContext } from '@app/auth/enums'
 import { ApiProperty } from '@nestjs/swagger'
 import { Exclude, Expose } from 'class-transformer'
 
@@ -52,6 +53,13 @@ export class OAuth2Response {
   })
   @Expose({ name: 'scope' })
   scope?: string
+
+  @ApiProperty({
+    type: IdentityContext,
+    description: 'The password when grant_type is set to "password_grant"'
+  })
+  @Expose({ name: 'identity_context' })
+  identityContext?: IdentityContext
 
   constructor(
     accessToken: string,

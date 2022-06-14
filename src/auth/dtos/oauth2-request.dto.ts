@@ -1,4 +1,4 @@
-import { GrantType } from '@app/auth/enums'
+import { GrantType, IdentityContext } from '@app/auth/enums'
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
 import { IsNotEmpty } from 'class-validator'
@@ -73,4 +73,11 @@ export class OAuth2Request {
   })
   @Expose({ name: 'password' })
   password?: string
+
+  @ApiProperty({
+    type: IdentityContext,
+    description: 'The password when grant_type is set to "password_grant"'
+  })
+  @Expose({ name: 'identity_context' })
+  identityContext?: IdentityContext
 }
