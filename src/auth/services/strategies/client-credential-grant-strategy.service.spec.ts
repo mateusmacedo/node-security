@@ -55,5 +55,15 @@ describe('ClientCredentialGrantStrategyService', () => {
         identityContext: request.identityContext
       })
     })
+    it('should throw error when provider throws', async () => {
+      jest.spyOn(identityProvider, 'identifyClient').mockRejectedValue(new Error('error'))
+      const request = createMock<OAuth2Request>({
+        grantType: GrantType.CLIENT_CREDENTIALS,
+        clientId: 'client-id',
+        clientSecret: 'client-secret',
+        identityContext: IdentityContext.AP
+      })
+      await expect(clientCredentialStrategy.validate(request)).rejects.toThrow()
+    })
   })
 })
