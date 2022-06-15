@@ -3,5 +3,5 @@ import { Injectable } from '@nestjs/common'
 
 @Injectable()
 export abstract class IdentityProviderService implements IdentifyProviderClient {
-  abstract identifyClient(data: IdentityProviderClient): Promise<IdentityProviderClient>
+  abstract identifyClient(data: Partial<IdentityProviderClient>): Promise<IdentityProviderClient>
 }
