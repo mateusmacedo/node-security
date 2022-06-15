@@ -30,7 +30,7 @@ export class ClientCredentialGrantStrategyService extends AbstractGrantStrategy 
     }
     return this.validateCredentials(request, clientIdentified)
   }
-  getOauth2Response(request: OAuth2Request): Promise<OAuth2Response> {
-    throw new Error('Method not implemented.')
+  async getOauth2Response(request: OAuth2Request): Promise<OAuth2Response> {
+    return this.identityProvider.createAccessToken(request) as Promise<OAuth2Response>
   }
 }
