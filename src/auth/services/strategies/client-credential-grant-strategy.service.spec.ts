@@ -1,10 +1,11 @@
-import { OAuth2Request } from '@app/auth/dtos'
+import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
 import { GrantType, IdentityContext } from '@app/auth/enums'
 import { IdentityProviderClient } from '@app/auth/interfaces'
 import { IdentityProviderService } from '@app/auth/services'
 import { ClientCredentialGrantStrategyService } from '@app/auth/services/strategies'
 import { createMock } from '@golevelup/nestjs-testing'
 import { Test } from '@nestjs/testing'
+import { plainToClass } from 'class-transformer'
 
 describe('ClientCredentialGrantStrategyService', () => {
   let clientCredentialStrategy: ClientCredentialGrantStrategyService
@@ -86,6 +87,10 @@ describe('ClientCredentialGrantStrategyService', () => {
       await expect(clientCredentialStrategy.validate(invalidRequest)).rejects.toThrow(
         new Error('Invalid client scopes')
       )
+      invalidRequest = { ...request, scopes: 'scope-4' }
+      await expect(clientCredentialStrategy.validate(invalidRequest)).rejects.toThrow(
+        new Error('Invalid client scopes')
+      )
     })
   })
   describe('getOauth2Response', () => {
@@ -96,6 +101,23 @@ describe('ClientCredentialGrantStrategyService', () => {
       await expect(clientCredentialStrategy.getOauth2Response(request)).rejects.toThrow()
       expect(identityProviderSpy).toBeCalledTimes(1)
       expect(identityProviderSpy).toBeCalledWith(request)
+    })
+    it('should return access token', async () => {
+      const identityProviderSpy = jest.spyOn(identityProvider, 'createAccessToken').mockResolvedValueOnce(
+        plainToClass(OAuth2Response, {
+          accessToken: 'access-token',
+          tokenType: 'bearer',
+          refreshToken: 'refresh-token',
+          accessTokenExp: 123456789,
+          refreshTokenExp: 123456789,
+          scope: ['scope-1', 'scope-2'].toString(),
+          identityContext: IdentityContext.AP
+        })
+      )
+      const response = await clientCredentialStrategy.getOauth2Response(request)
+      expect(identityProviderSpy).toBeCalledTimes(1)
+      expect(identityProviderSpy).toBeCalledWith(request)
+      expect(response).toBeInstanceOf(OAuth2Response)
     })
   })
 })
