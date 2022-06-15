@@ -21,13 +21,12 @@ class Oauth2GrantStrategyStub implements Oauth2GrantStrategyInterface {
   async getOauth2Response(request: OAuth2Request): Promise<OAuth2Response> {
     return request.grantType === GrantType.CLIENT_CREDENTIALS
       ? plainToClass(OAuth2Response, {
-          accessToken: 'access-token',
-          tokenType: 'bearer',
-          refreshToken: 'refresh-token',
-          accessTokenExp: 123456789,
-          refreshTokenExp: 123456789,
+          access_token: 'access-token',
+          token_type: 'bearer',
+          refresh_token: 'refresh-token',
+          expires_in: 123456789,
           scope: ['scope-1', 'scope-2'].toString(),
-          identityContext: IdentityContext.AP
+          identity_context: IdentityContext.AP
         })
       : Promise.reject(new InvalidGrantTypeException())
   }

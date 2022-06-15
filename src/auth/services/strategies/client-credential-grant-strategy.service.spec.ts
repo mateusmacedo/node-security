@@ -105,13 +105,12 @@ describe('ClientCredentialGrantStrategyService', () => {
     it('should return access token', async () => {
       const identityProviderSpy = jest.spyOn(identityProvider, 'createAccessToken').mockResolvedValueOnce(
         plainToClass(OAuth2Response, {
-          accessToken: 'access-token',
-          tokenType: 'bearer',
-          refreshToken: 'refresh-token',
-          accessTokenExp: 123456789,
-          refreshTokenExp: 123456789,
+          access_token: 'access-token',
+          token_type: 'bearer',
+          refresh_token: 'refresh-token',
+          expires_in: 123456789,
           scope: ['scope-1', 'scope-2'].toString(),
-          identityContext: IdentityContext.AP
+          identity_context: IdentityContext.AP
         })
       )
       const response = await clientCredentialStrategy.getOauth2Response(request)
