@@ -1,5 +1,6 @@
 import { OAuth2Request } from '@app/auth/dtos'
 import { GrantType, IdentityContext } from '@app/auth/enums'
+import { IdentityProviderClient } from '@app/auth/interfaces'
 import { IdentityProviderService } from '@app/auth/services'
 import { ClientCredentialGrantStrategyService } from '@app/auth/services/strategies'
 import { createMock } from '@golevelup/nestjs-testing'
@@ -9,6 +10,7 @@ describe('ClientCredentialGrantStrategyService', () => {
   let clientCredentialStrategy: ClientCredentialGrantStrategyService
   let identityProvider: IdentityProviderService
   let request: OAuth2Request
+  let clientIdentityProvider: IdentityProviderClient
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -19,8 +21,16 @@ describe('ClientCredentialGrantStrategyService', () => {
       identityContext: IdentityContext.AP,
       scopes: ['scope-1', 'scope-2']
     }
+    clientIdentityProvider = {
+      allowedAuthFlow: [GrantType.CLIENT_CREDENTIALS],
+      clientId: 'client-id',
+      clientSecret: 'client-secret',
+      clientName: 'client-name',
+      clientScopes: ['scope-1', 'scope-2'],
+      identityContext: IdentityContext.AP
+    }
     identityProvider = createMock<IdentityProviderService>({
-      identifyClient: jest.fn().mockResolvedValue(request)
+      identifyClient: jest.fn().mockResolvedValue(clientIdentityProvider)
     })
     const moduleRef = await Test.createTestingModule({
       imports: [],
@@ -57,6 +67,24 @@ describe('ClientCredentialGrantStrategyService', () => {
     it('should throw a error if client not found', async () => {
       jest.spyOn(identityProvider, 'identifyClient').mockResolvedValue(null)
       await expect(clientCredentialStrategy.validate(request)).rejects.toThrow()
+    })
+    it('should throw a error if client credentials is not valid', async () => {
+      let invalidRequest = { ...request, clientSecret: 'invalid-secret' }
+      await expect(clientCredentialStrategy.validate(invalidRequest)).rejects.toThrow(
+        new Error('Invalid client credentials')
+      )
+      invalidRequest = { ...request, identityContext: 'invalid-context' as any }
+      await expect(clientCredentialStrategy.validate(invalidRequest)).rejects.toThrow(
+        new Error('Invalid client credentials')
+      )
+      invalidRequest = { ...request, grantType: 'invalid-grant-type' as any }
+      await expect(clientCredentialStrategy.validate(invalidRequest)).rejects.toThrow(
+        new Error('Client not allowed to use this grant type')
+      )
+      invalidRequest = { ...request, scopes: ['scope-1', 'scope-2', 'scope-3'] }
+      await expect(clientCredentialStrategy.validate(invalidRequest)).rejects.toThrow(
+        new Error('Invalid client scopes')
+      )
     })
   })
 })
