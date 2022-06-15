@@ -30,7 +30,8 @@ describe('ClientCredentialGrantStrategyService', () => {
       identityContext: IdentityContext.AP
     }
     identityProvider = createMock<IdentityProviderService>({
-      identifyClient: jest.fn().mockResolvedValue(clientIdentityProvider)
+      identifyClient: jest.fn().mockResolvedValue(clientIdentityProvider),
+      createAccessToken: jest.fn().mockResolvedValue('access-token')
     })
     const moduleRef = await Test.createTestingModule({
       imports: [],
@@ -85,6 +86,16 @@ describe('ClientCredentialGrantStrategyService', () => {
       await expect(clientCredentialStrategy.validate(invalidRequest)).rejects.toThrow(
         new Error('Invalid client scopes')
       )
+    })
+  })
+  describe('getOauth2Response', () => {
+    it('should throw a error when provider throws', async () => {
+      const identityProviderSpy = jest
+        .spyOn(identityProvider, 'createAccessToken')
+        .mockRejectedValueOnce(new Error('error'))
+      await expect(clientCredentialStrategy.getOauth2Response(request)).rejects.toThrow()
+      expect(identityProviderSpy).toBeCalledTimes(1)
+      expect(identityProviderSpy).toBeCalledWith(request)
     })
   })
 })
