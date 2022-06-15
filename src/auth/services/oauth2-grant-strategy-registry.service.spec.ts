@@ -63,7 +63,7 @@ describe('Oauth2GrantStrategyRegistryService', () => {
     it('should register a grant strategy', () => {
       const getSpy = jest.spyOn(service['moduleRef'], 'get')
       const reflect = jest.spyOn(Reflect, 'getMetadata')
-      service.register(explorer.explore(OAUTH2_STRATEGY_METADATA))
+      service.register(explorer.explore<Oauth2GrantStrategyInterface>(OAUTH2_STRATEGY_METADATA))
       expect(service['registry'].client_credentials).toBeDefined()
       expect(getSpy).toHaveBeenCalledTimes(1)
       expect(getSpy).toHaveBeenCalledWith(Oauth2GrantStrategyStub, { strict: false })
