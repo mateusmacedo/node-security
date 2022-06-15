@@ -60,18 +60,4 @@ export class OAuth2Response {
   })
   @Expose({ name: 'identity_context' })
   identityContext?: IdentityContext
-
-  constructor(
-    accessToken: string,
-    refreshToken: string,
-    accessTokenExp: number,
-    refreshTokenExp: number,
-    scope?: string
-  ) {
-    this.accessToken = accessToken
-    this.refreshToken = refreshToken
-    this.accessTokenExp = accessTokenExp
-    this.refreshTokenExp = refreshTokenExp
-    this.scope = scope
-  }
 }

@@ -1,6 +1,6 @@
 import { OAUTH2_STRATEGY_METADATA } from '@app/auth/constants'
 import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
-import { GrantType } from '@app/auth/enums'
+import { GrantType, IdentityContext } from '@app/auth/enums'
 import { InvalidGrantTypeException } from '@app/auth/errors/invalid-grant-type.exception'
 import { Oauth2StrategyNotFoundException } from '@app/auth/exceptions'
 import { Oauth2GrantStrategyInterface } from '@app/auth/interfaces'
@@ -10,6 +10,7 @@ import { StrategyExplorerService } from '@app/common/services'
 import { createMock } from '@golevelup/nestjs-testing'
 import { Injectable } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
+import { plainToClass } from 'class-transformer'
 
 @Injectable()
 @Oauth2GrantStrategy(GrantType.CLIENT_CREDENTIALS)
@@ -19,7 +20,15 @@ class Oauth2GrantStrategyStub implements Oauth2GrantStrategyInterface {
   }
   async getOauth2Response(request: OAuth2Request): Promise<OAuth2Response> {
     return request.grantType === GrantType.CLIENT_CREDENTIALS
-      ? new OAuth2Response('access_token', 'refresh_token', 1, 1, 'scope')
+      ? plainToClass(OAuth2Response, {
+          accessToken: 'access-token',
+          tokenType: 'bearer',
+          refreshToken: 'refresh-token',
+          accessTokenExp: 123456789,
+          refreshTokenExp: 123456789,
+          scope: ['scope-1', 'scope-2'].toString(),
+          identityContext: IdentityContext.AP
+        })
       : Promise.reject(new InvalidGrantTypeException())
   }
 }

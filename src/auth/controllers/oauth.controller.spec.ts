@@ -1,12 +1,13 @@
 import { Oauth2Controller } from '@app/auth/controllers'
 import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
-import { GrantType } from '@app/auth/enums'
+import { GrantType, IdentityContext } from '@app/auth/enums'
 import { InvalidGrantTypeException } from '@app/auth/errors'
 import { Oauth2GrantStrategyInterface } from '@app/auth/interfaces'
 import { Oauth2GrantStrategyRegistry } from '@app/auth/services'
 import { createMock } from '@golevelup/nestjs-testing'
 import { InternalServerErrorException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
+import { plainToClass } from 'class-transformer'
 
 describe('OauthController', () => {
   let sut: Oauth2Controller
@@ -16,7 +17,15 @@ describe('OauthController', () => {
   let strategy: Oauth2GrantStrategyInterface
   beforeEach(async () => {
     jest.clearAllMocks()
-    response = new OAuth2Response('accessToken', 'refreshToken', 1, 1, 'scope')
+    response = plainToClass(OAuth2Response, {
+      accessToken: 'access-token',
+      tokenType: 'bearer',
+      refreshToken: 'refresh-token',
+      accessTokenExp: 123456789,
+      refreshTokenExp: 123456789,
+      scope: ['scope-1', 'scope-2'].toString(),
+      identityContext: IdentityContext.AP
+    })
     strategy = createMock<Oauth2GrantStrategyInterface>()
     strategyRegistry = createMock<Oauth2GrantStrategyRegistry>({
       validate: jest.fn().mockResolvedValue(true),
