@@ -22,6 +22,7 @@ describe('CognitoIdentityProviderService', () => {
   let explorer: StrategyExplorerService
   let module: TestingModule
   beforeEach(async () => {
+    jest.clearAllMocks()
     module = await Test.createTestingModule({
       imports: [],
       controllers: [],
@@ -51,7 +52,7 @@ describe('CognitoIdentityProviderService', () => {
     expect(explorer).toBeDefined()
   })
   describe('register', () => {
-    it('should register a client strategy', () => {
+    it('should register a grant client strategy', () => {
       const getSpy = jest.spyOn(cognitoIdentityProviderService['moduleRef'], 'get')
       const reflect = jest.spyOn(Reflect, 'getMetadata')
       cognitoIdentityProviderService.register(explorer.explore(IDENTITY_PROVIDER_METADATA))
@@ -60,6 +61,14 @@ describe('CognitoIdentityProviderService', () => {
       expect(getSpy).toHaveBeenCalledWith(IdentityProviderClientServiceStub, { strict: false })
       expect(reflect).toHaveBeenCalledTimes(1)
       expect(reflect).toHaveBeenCalledWith(IDENTITY_PROVIDER_METADATA, IdentityProviderClientServiceStub)
+    })
+    it('should no have client strategies registered', () => {
+      cognitoIdentityProviderService['registry'] = {}
+      const getSpy = jest.spyOn(cognitoIdentityProviderService['moduleRef'], 'get').mockReturnValue(undefined)
+      cognitoIdentityProviderService.register([IdentityProviderClientServiceStub])
+      expect(cognitoIdentityProviderService['registry']).toEqual({})
+      expect(getSpy).toHaveBeenCalledTimes(1)
+      expect(getSpy).toHaveBeenCalledWith(IdentityProviderClientServiceStub, { strict: false })
     })
   })
 })
