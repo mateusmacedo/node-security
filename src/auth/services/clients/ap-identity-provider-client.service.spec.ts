@@ -9,8 +9,8 @@ describe('ApIdentityProviderClientService', () => {
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [ConfigModule],
-      controllers: [ApIdentityProviderClientService],
-      providers: []
+      controllers: [],
+      providers: [ApIdentityProviderClientService]
     }).compile()
 
     apIdentityProviderClientService = moduleRef.get<ApIdentityProviderClientService>(ApIdentityProviderClientService)
