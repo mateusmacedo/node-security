@@ -1,7 +1,7 @@
 import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
 import { InvalidGrantTypeException } from '@app/auth/errors'
 import { Oauth2GrantStrategyRegistry } from '@app/auth/services'
-import { Controller, InternalServerErrorException, Post, Query } from '@nestjs/common'
+import { BadRequestException, Controller, InternalServerErrorException, Post, Query } from '@nestjs/common'
 
 @Controller('oauth2')
 export class Oauth2Controller {
@@ -15,7 +15,7 @@ export class Oauth2Controller {
       }
       return this.strategyRegistry.getOauth2Response(request)
     } catch (err) {
-      if (err instanceof InvalidGrantTypeException) {
+      if (err instanceof BadRequestException) {
         throw err
       }
       throw new InternalServerErrorException('We have a problem')

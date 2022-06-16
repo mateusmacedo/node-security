@@ -7,22 +7,12 @@ import { IdentityProvider } from '@app/auth/services/clients/decorator'
 import { StrategyExplorerService } from '@app/common/services'
 import {
   CognitoIdentityProviderClient,
-  DescribeUserPoolClientCommand,
   DescribeUserPoolClientCommandOutput
 } from '@aws-sdk/client-cognito-identity-provider'
 import { createMock } from '@golevelup/nestjs-testing'
 import { Injectable } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { Test, TestingModule } from '@nestjs/testing'
-
-jest.mock('@aws-sdk/client-cognito-identity-provider', () => {
-  const original = jest.requireActual('@aws-sdk/client-cognito-identity-provider')
-  return {
-    ...original,
-    DescribeUserPoolClientCommand: jest.fn(),
-    DescribeUserPoolClientCommandOutput: jest.fn()
-  }
-})
 
 @Injectable()
 @IdentityProvider(IdentityContext.AP)
@@ -44,7 +34,7 @@ describe('CognitoIdentityProviderService', () => {
   let identifyCommandOutput: DescribeUserPoolClientCommandOutput
   beforeEach(async () => {
     jest.clearAllMocks()
-    identifyCommandOutput = createMock<DescribeUserPoolClientCommandOutput>({
+    identifyCommandOutput = {
       $metadata: undefined,
       UserPoolClient: {
         AllowedOAuthFlows: [],
@@ -55,7 +45,7 @@ describe('CognitoIdentityProviderService', () => {
         ExplicitAuthFlows: [],
         UserPoolId: 'userPoolId'
       }
-    })
+    }
     module = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
