@@ -1,6 +1,6 @@
 import { OAUTH2_STRATEGY_METADATA } from '@app/auth/constants'
 import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
-import { Oauth2StrategyNotFoundException } from '@app/auth/exceptions'
+import { Oauth2StrategyNotFoundException } from '@app/auth/errors'
 import { Oauth2GrantStrategyInterface, StrategyRegistry } from '@app/auth/interfaces'
 import { Injectable, Type } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
@@ -17,7 +17,6 @@ export class Oauth2GrantStrategyRegistry
 
   register(strategies: Oauth2GrantStrategyInterfaceType[]): void {
     strategies.forEach((strategy: Oauth2GrantStrategyInterfaceType) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const instance = this.moduleRef.get(strategy, {
         strict: false
       })

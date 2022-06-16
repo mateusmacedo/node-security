@@ -1,4 +1,5 @@
 import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
+import { InvalidClientScopesException, InvalidCredentialsException, InvalidGrantTypeException } from '@app/auth/errors'
 import { IdentityProviderClient } from '@app/auth/interfaces'
 import { IdentityProviderService } from '@app/auth/services'
 import { AbstractGrantStrategy } from '@app/auth/services/strategies'
@@ -11,14 +12,14 @@ export class ClientCredentialGrantStrategyService extends AbstractGrantStrategy 
   }
   private validateCredentials(request: OAuth2Request, client: IdentityProviderClient): Promise<boolean> {
     if (client.clientSecret !== request.clientSecret || request.identityContext !== client.identityContext) {
-      throw new Error('Invalid client credentials')
+      throw new InvalidCredentialsException()
     }
     if (!client.allowedAuthFlow.includes(request.grantType)) {
-      throw new Error('Client not allowed to use this grant type')
+      throw new InvalidGrantTypeException()
     }
     const requestScopes = typeof request.scopes === 'string' ? [request.scopes] : request.scopes
     if (!requestScopes.every((scope) => client.clientScopes.includes(scope))) {
-      throw new Error('Invalid client scopes')
+      throw new InvalidClientScopesException()
     }
     return Promise.resolve(true)
   }

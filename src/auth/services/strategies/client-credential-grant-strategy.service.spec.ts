@@ -1,5 +1,6 @@
 import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
 import { GrantType, IdentityContext } from '@app/auth/enums'
+import { InvalidClientScopesException, InvalidCredentialsException, InvalidGrantTypeException } from '@app/auth/errors'
 import { IdentityProviderClient } from '@app/auth/interfaces'
 import { IdentityProviderService } from '@app/auth/services'
 import { ClientCredentialGrantStrategyService } from '@app/auth/services/strategies'
@@ -72,24 +73,18 @@ describe('ClientCredentialGrantStrategyService', () => {
     })
     it('should throw a error if client credentials is not valid', async () => {
       let invalidRequest = { ...request, clientSecret: 'invalid-secret' }
-      await expect(clientCredentialStrategy.validate(invalidRequest)).rejects.toThrow(
-        new Error('Invalid client credentials')
-      )
+      await expect(clientCredentialStrategy.validate(invalidRequest)).rejects.toThrow(new InvalidCredentialsException())
       invalidRequest = { ...request, identityContext: 'invalid-context' as any }
-      await expect(clientCredentialStrategy.validate(invalidRequest)).rejects.toThrow(
-        new Error('Invalid client credentials')
-      )
+      await expect(clientCredentialStrategy.validate(invalidRequest)).rejects.toThrow(new InvalidCredentialsException())
       invalidRequest = { ...request, grantType: 'invalid-grant-type' as any }
-      await expect(clientCredentialStrategy.validate(invalidRequest)).rejects.toThrow(
-        new Error('Client not allowed to use this grant type')
-      )
+      await expect(clientCredentialStrategy.validate(invalidRequest)).rejects.toThrow(new InvalidGrantTypeException())
       invalidRequest = { ...request, scopes: ['scope-1', 'scope-2', 'scope-3'] }
       await expect(clientCredentialStrategy.validate(invalidRequest)).rejects.toThrow(
-        new Error('Invalid client scopes')
+        new InvalidClientScopesException()
       )
       invalidRequest = { ...request, scopes: 'scope-4' }
       await expect(clientCredentialStrategy.validate(invalidRequest)).rejects.toThrow(
-        new Error('Invalid client scopes')
+        new InvalidClientScopesException()
       )
     })
   })
