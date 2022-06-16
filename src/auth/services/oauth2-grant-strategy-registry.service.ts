@@ -28,18 +28,22 @@ export class Oauth2GrantStrategyRegistry
       this.registry[strategyName] = instance
     })
   }
-
-  async validate(request: OAuth2Request): Promise<boolean> {
+  private validateGrantType(request: OAuth2Request): boolean {
     if (!(request.grantType in this.registry)) {
       throw new Oauth2StrategyNotFoundException(request.grantType)
     }
-    return this.registry[request.grantType].validate(request)
+    return true
+  }
+
+  async validate(request: OAuth2Request): Promise<boolean> {
+    if (this.validateGrantType(request)) {
+      return this.registry[request.grantType].validate(request)
+    }
   }
 
   async getOauth2Response(request: OAuth2Request): Promise<OAuth2Response> {
-    if (!(request.grantType in this.registry)) {
-      throw new Oauth2StrategyNotFoundException(request.grantType)
+    if (this.validateGrantType(request)) {
+      return this.registry[request.grantType].getOauth2Response(request)
     }
-    return this.registry[request.grantType].getOauth2Response(request)
   }
 }
