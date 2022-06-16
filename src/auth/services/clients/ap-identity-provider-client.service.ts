@@ -1,26 +1,20 @@
 import { IdentityContext } from '@app/auth/enums'
+import { CognitoIdentityProviderClientWithPoolId } from '@app/auth/interfaces'
 import { IdentityProvider } from '@app/auth/services/clients/decorator'
-import {
-  CognitoIdentityProviderClient,
-  CognitoIdentityProviderClientConfig
-} from '@aws-sdk/client-cognito-identity-provider'
-import { Injectable } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
+import { CognitoIdentityProviderClient } from '@aws-sdk/client-cognito-identity-provider'
+import { Inject, Injectable } from '@nestjs/common'
 
 @Injectable()
 @IdentityProvider(IdentityContext.AP)
-export class ApIdentityProviderClientService extends CognitoIdentityProviderClient {
-  constructor(configService: ConfigService) {
-    const endpoint =
-      configService.get('AWS_COGNITO_IDENTITY_PROVIDER_ENDPOINT') + configService.get('AWS_COGNITO_AP_USER_POOL_ID')
-    const config: CognitoIdentityProviderClientConfig = {
-      credentials: {
-        accessKeyId: configService.get('AWS_ACCESS_KEY_ID'),
-        secretAccessKey: configService.get('AWS_SECRET_ACCESS_KEY')
-      },
-      region: configService.get('AWS_DEFAULT_REGION'),
-      endpoint
-    }
-    super(config)
+export class ApIdentityProviderClientService implements CognitoIdentityProviderClientWithPoolId {
+  constructor(
+    @Inject('AP_USER_POOL_ID') private readonly userPoolId: string,
+    @Inject('AP_PROVIDER_CLIENT') private readonly client: CognitoIdentityProviderClient
+  ) {}
+  getUserPoolId(): string {
+    return this.userPoolId
+  }
+  getClient(): CognitoIdentityProviderClient {
+    return this.client
   }
 }
