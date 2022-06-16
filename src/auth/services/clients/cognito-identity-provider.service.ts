@@ -1,30 +1,32 @@
 import { IDENTITY_PROVIDER_METADATA } from '@app/auth/constants'
 import { OAuth2Request } from '@app/auth/dtos'
-import { IdentityProviderClient, StrategyRegistry } from '@app/auth/interfaces'
+import { IdentifyProviderClient, IdentityProviderClient, StrategyRegistry } from '@app/auth/interfaces'
 import { IdentityProviderService } from '@app/auth/services'
-import { CognitoIdentityProviderClient } from '@aws-sdk/client-cognito-identity-provider'
-import { Injectable } from '@nestjs/common'
+import { Injectable, Type } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
 
+type IdentityProviderClientType = Type<IdentifyProviderClient>
 @Injectable()
-export class CognitoIdentityProviderService extends IdentityProviderService implements StrategyRegistry {
-  private registry: { [s: string]: CognitoIdentityProviderClient } = {}
+export class CognitoIdentityProviderService
+  extends IdentityProviderService
+  implements StrategyRegistry<IdentityProviderClientType>
+{
+  private registry: { [s: string]: IdentifyProviderClient } = {}
 
   constructor(private readonly moduleRef: ModuleRef) {
     super()
   }
 
-  register<CognitoIdentityProviderClient>(strategies: CognitoIdentityProviderClient[]): void {
-    strategies.forEach((strategy: CognitoIdentityProviderClient) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const instance = this.moduleRef.get(strategy as any, {
+  register(strategies): void {
+    strategies.forEach((strategy) => {
+      const instance = this.moduleRef.get(strategy, {
         strict: false
       })
       if (!instance) {
         return
       }
       const strategyName = Reflect.getMetadata(IDENTITY_PROVIDER_METADATA, strategy)
-      this.registry[strategyName] = instance
+      this.registry[strategyName] = instance as IdentifyProviderClient
     })
   }
 

@@ -1,3 +1,3 @@
-export interface StrategyRegistry {
-  register<T>(strategies: T[]): void
+export interface StrategyRegistry<T> {
+  register(strategies: T[]): void
 }
