@@ -1,7 +1,11 @@
 import { IDENTITY_PROVIDER_METADATA } from '@app/auth/constants'
 import { OAuth2Request } from '@app/auth/dtos'
-import { CognitoIdentityProviderClientWithPoolId, IdentityProviderClient, StrategyRegistry } from '@app/auth/interfaces'
-import { IdentityProviderService } from '@app/auth/services'
+import {
+  IdentityProviderClientInterface,
+  IdentityProviderInterface,
+  StrategyRegistryInterface
+} from '@app/auth/interfaces'
+import { AbstractIdentityProviderService } from '@app/auth/services/providers/abstract'
 import {
   DescribeUserPoolClientCommand,
   DescribeUserPoolClientCommandInput
@@ -9,19 +13,19 @@ import {
 import { Injectable, Type } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
 
-type CognitoIdentityProviderClientType = Type<CognitoIdentityProviderClientWithPoolId>
+type IdentityProviderClientType = Type<IdentityProviderClientInterface>
 @Injectable()
-export class CognitoIdentityProviderService
-  extends IdentityProviderService
-  implements StrategyRegistry<CognitoIdentityProviderClientType>
+export class IdentityProviderService
+  extends AbstractIdentityProviderService
+  implements StrategyRegistryInterface<IdentityProviderClientType>
 {
-  private registry: { [s: string]: CognitoIdentityProviderClientWithPoolId } = {}
+  private registry: { [s: string]: IdentityProviderClientInterface } = {}
 
   constructor(private readonly moduleRef: ModuleRef) {
     super()
   }
 
-  register(strategies: CognitoIdentityProviderClientType[]): void {
+  register(strategies: IdentityProviderClientType[]): void {
     strategies.forEach((strategy) => {
       const instance = this.moduleRef.get(strategy, {
         strict: false
@@ -38,7 +42,7 @@ export class CognitoIdentityProviderService
     throw new Error('Method not implemented.')
   }
 
-  async identifyClient(data: Partial<IdentityProviderClient>): Promise<IdentityProviderClient> {
+  async identifyClient(data: Partial<IdentityProviderInterface>): Promise<IdentityProviderInterface> {
     const { identityContext, clientId } = data
     const identifyClientCommandInput: DescribeUserPoolClientCommandInput = {
       UserPoolId: this.registry[identityContext].getUserPoolId(),
@@ -52,6 +56,6 @@ export class CognitoIdentityProviderService
       clientName: result.UserPoolClient.ClientName,
       clientScopes: result.UserPoolClient.AllowedOAuthScopes,
       clientSecret: result.UserPoolClient.ClientSecret
-    } as IdentityProviderClient
+    } as IdentityProviderInterface
   }
 }

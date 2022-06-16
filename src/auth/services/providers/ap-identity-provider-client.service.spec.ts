@@ -1,4 +1,4 @@
-import { ApIdentityProviderClientService } from '@app/auth/services/clients'
+import { ApIdentityProviderClientService } from '@app/auth/services/providers'
 import { CognitoIdentityProviderClient } from '@aws-sdk/client-cognito-identity-provider'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { Test } from '@nestjs/testing'

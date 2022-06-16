@@ -1,9 +1,9 @@
 import { IDENTITY_PROVIDER_METADATA } from '@app/auth/constants'
 import { IdentityContext } from '@app/auth/enums'
-import { CognitoIdentityProviderClientWithPoolId, IdentityProviderClient } from '@app/auth/interfaces'
-import { IdentityProviderService } from '@app/auth/services'
-import { CognitoIdentityProviderService } from '@app/auth/services/clients'
-import { IdentityProvider } from '@app/auth/services/clients/decorator'
+import { IdentityProviderClientInterface, IdentityProviderInterface } from '@app/auth/interfaces'
+import { IdentityProviderService } from '@app/auth/services/providers'
+import { AbstractIdentityProviderService } from '@app/auth/services/providers/abstract'
+import { IdentityProviderDecorator } from '@app/auth/services/providers/decorator'
 import { StrategyExplorerService } from '@app/common/services'
 import {
   CognitoIdentityProviderClient,
@@ -15,8 +15,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { Test, TestingModule } from '@nestjs/testing'
 
 @Injectable()
-@IdentityProvider(IdentityContext.AP)
-class IdentityProviderClientServiceStub implements CognitoIdentityProviderClientWithPoolId {
+@IdentityProviderDecorator(IdentityContext.AP)
+class IdentityProviderClientServiceStub implements IdentityProviderClientInterface {
   constructor(private readonly userPoolId: string, private readonly client: CognitoIdentityProviderClient) {}
   getUserPoolId(): string {
     return this.userPoolId
@@ -27,7 +27,7 @@ class IdentityProviderClientServiceStub implements CognitoIdentityProviderClient
 }
 
 describe('CognitoIdentityProviderService', () => {
-  let cognitoIdentityProviderService: CognitoIdentityProviderService
+  let cognitoIdentityProviderService: IdentityProviderService
   let identityProviderClientServiceStub: IdentityProviderClientServiceStub
   let explorer: StrategyExplorerService
   let module: TestingModule
@@ -68,19 +68,19 @@ describe('CognitoIdentityProviderService', () => {
           }
         },
         {
-          provide: IdentityProviderService,
-          useClass: CognitoIdentityProviderService
+          provide: AbstractIdentityProviderService,
+          useClass: IdentityProviderService
         }
       ]
     }).compile()
 
-    cognitoIdentityProviderService = module.get<IdentityProviderService>(
-      IdentityProviderService
-    ) as CognitoIdentityProviderService
+    cognitoIdentityProviderService = module.get<AbstractIdentityProviderService>(
+      AbstractIdentityProviderService
+    ) as IdentityProviderService
     explorer = module.get<StrategyExplorerService>(StrategyExplorerService)
     identityProviderClientServiceStub = module.get<IdentityProviderClientServiceStub>(IdentityProviderClientServiceStub)
     cognitoIdentityProviderService.register(
-      explorer.explore<CognitoIdentityProviderClientWithPoolId>(IDENTITY_PROVIDER_METADATA)
+      explorer.explore<IdentityProviderClientInterface>(IDENTITY_PROVIDER_METADATA)
     )
   })
 
@@ -95,7 +95,7 @@ describe('CognitoIdentityProviderService', () => {
       const reflect = jest.spyOn(Reflect, 'getMetadata')
       cognitoIdentityProviderService['registry'] = {}
       cognitoIdentityProviderService.register(
-        explorer.explore<CognitoIdentityProviderClientWithPoolId>(IDENTITY_PROVIDER_METADATA)
+        explorer.explore<IdentityProviderClientInterface>(IDENTITY_PROVIDER_METADATA)
       )
       expect(cognitoIdentityProviderService['registry'][IdentityContext.AP]).toBeDefined()
       expect(getSpy).toHaveBeenCalledTimes(1)
@@ -113,7 +113,7 @@ describe('CognitoIdentityProviderService', () => {
   })
   describe('identifyClient', () => {
     it('should identifyClient successfully', async () => {
-      const clientData: Partial<IdentityProviderClient> = {
+      const clientData: Partial<IdentityProviderInterface> = {
         clientId: '3e67tihr5n17r4g1nkoi18s8bq',
         identityContext: IdentityContext.AP
       }

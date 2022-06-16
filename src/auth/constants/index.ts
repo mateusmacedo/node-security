@@ -1,1 +1,1 @@
-export * from './oauth2.constants'
+export * from './auth.constants'

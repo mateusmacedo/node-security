@@ -1,8 +1,8 @@
 import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
 import { GrantType, IdentityContext } from '@app/auth/enums'
 import { InvalidClientScopesException, InvalidCredentialsException, InvalidGrantTypeException } from '@app/auth/errors'
-import { IdentityProviderClient } from '@app/auth/interfaces'
-import { IdentityProviderService } from '@app/auth/services'
+import { IdentityProviderInterface } from '@app/auth/interfaces'
+import { AbstractIdentityProviderService } from '@app/auth/services/providers/abstract'
 import { ClientCredentialGrantStrategyService } from '@app/auth/services/strategies'
 import { createMock } from '@golevelup/nestjs-testing'
 import { Test } from '@nestjs/testing'
@@ -10,9 +10,9 @@ import { plainToClass } from 'class-transformer'
 
 describe('ClientCredentialGrantStrategyService', () => {
   let clientCredentialStrategy: ClientCredentialGrantStrategyService
-  let identityProvider: IdentityProviderService
+  let identityProviderService: AbstractIdentityProviderService
   let request: OAuth2Request
-  let clientIdentityProvider: IdentityProviderClient
+  let identityProvider: IdentityProviderInterface
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -23,7 +23,7 @@ describe('ClientCredentialGrantStrategyService', () => {
       identityContext: IdentityContext.AP,
       scopes: ['scope-1', 'scope-2']
     }
-    clientIdentityProvider = {
+    identityProvider = {
       allowedAuthFlow: [GrantType.CLIENT_CREDENTIALS],
       clientId: 'client-id',
       clientSecret: 'client-secret',
@@ -31,8 +31,8 @@ describe('ClientCredentialGrantStrategyService', () => {
       clientScopes: ['scope-1', 'scope-2'],
       identityContext: IdentityContext.AP
     }
-    identityProvider = createMock<IdentityProviderService>({
-      identifyClient: jest.fn().mockResolvedValue(clientIdentityProvider),
+    identityProviderService = createMock<AbstractIdentityProviderService>({
+      identifyClient: jest.fn().mockResolvedValue(identityProvider),
       createAccessToken: jest.fn().mockResolvedValue('access-token')
     })
     const moduleRef = await Test.createTestingModule({
@@ -40,35 +40,35 @@ describe('ClientCredentialGrantStrategyService', () => {
       controllers: [],
       providers: [
         {
-          provide: IdentityProviderService,
-          useValue: identityProvider
+          provide: AbstractIdentityProviderService,
+          useValue: identityProviderService
         },
         ClientCredentialGrantStrategyService
       ]
     }).compile()
 
     clientCredentialStrategy = moduleRef.get<ClientCredentialGrantStrategyService>(ClientCredentialGrantStrategyService)
-    identityProvider = moduleRef.get<IdentityProviderService>(IdentityProviderService)
+    identityProviderService = moduleRef.get<AbstractIdentityProviderService>(AbstractIdentityProviderService)
   })
 
   it('should be defined', () => {
     expect(clientCredentialStrategy).toBeDefined()
-    expect(identityProvider).toBeDefined()
+    expect(identityProviderService).toBeDefined()
   })
 
   describe('validate', () => {
     it('should identify client on provider', async () => {
-      const providerSpy = jest.spyOn(identityProvider, 'identifyClient')
+      const providerSpy = jest.spyOn(identityProviderService, 'identifyClient')
       await clientCredentialStrategy.validate(request)
       expect(providerSpy).toBeCalledTimes(1)
       expect(providerSpy).toBeCalledWith({ clientId: request.clientId, identityContext: request.identityContext })
     })
     it('should throw error when provider throws', async () => {
-      jest.spyOn(identityProvider, 'identifyClient').mockRejectedValue(new Error('error'))
+      jest.spyOn(identityProviderService, 'identifyClient').mockRejectedValue(new Error('error'))
       await expect(clientCredentialStrategy.validate(request)).rejects.toThrow()
     })
     it('should throw a error if client not found', async () => {
-      jest.spyOn(identityProvider, 'identifyClient').mockResolvedValue(null)
+      jest.spyOn(identityProviderService, 'identifyClient').mockResolvedValue(null)
       await expect(clientCredentialStrategy.validate(request)).rejects.toThrow()
     })
     it('should throw a error if client credentials is not valid', async () => {
@@ -91,14 +91,14 @@ describe('ClientCredentialGrantStrategyService', () => {
   describe('getOauth2Response', () => {
     it('should throw a error when provider throws', async () => {
       const identityProviderSpy = jest
-        .spyOn(identityProvider, 'createAccessToken')
+        .spyOn(identityProviderService, 'createAccessToken')
         .mockRejectedValueOnce(new Error('error'))
       await expect(clientCredentialStrategy.getOauth2Response(request)).rejects.toThrow()
       expect(identityProviderSpy).toBeCalledTimes(1)
       expect(identityProviderSpy).toBeCalledWith(request)
     })
     it('should return access token', async () => {
-      const identityProviderSpy = jest.spyOn(identityProvider, 'createAccessToken').mockResolvedValueOnce(
+      const identityProviderSpy = jest.spyOn(identityProviderService, 'createAccessToken').mockResolvedValueOnce(
         plainToClass(OAuth2Response, {
           access_token: 'access-token',
           token_type: 'bearer',

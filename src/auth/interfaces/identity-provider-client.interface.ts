@@ -1,10 +1,6 @@
-import { IdentityContext } from '@app/auth/enums'
+import { CognitoIdentityProviderClient } from '@aws-sdk/client-cognito-identity-provider'
 
-export interface IdentityProviderClient {
-  allowedAuthFlow: string[]
-  clientId: string
-  clientSecret: string
-  clientName: string
-  clientScopes: string[]
-  identityContext?: IdentityContext
+export interface IdentityProviderClientInterface {
+  getUserPoolId(): string
+  getClient(): CognitoIdentityProviderClient
 }

@@ -56,7 +56,7 @@ export class OAuth2Response {
 
   @ApiProperty({
     type: IdentityContext,
-    description: 'The password when grant_type is set to "password_grant"'
+    description: 'The identity context"'
   })
   @Expose({ name: 'identity_context' })
   identityContext?: IdentityContext

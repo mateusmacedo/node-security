@@ -1,12 +1,12 @@
 import { IdentityContext } from '@app/auth/enums'
-import { CognitoIdentityProviderClientWithPoolId } from '@app/auth/interfaces'
-import { IdentityProvider } from '@app/auth/services/clients/decorator'
+import { IdentityProviderClientInterface } from '@app/auth/interfaces'
+import { IdentityProviderDecorator } from '@app/auth/services/providers/decorator'
 import { CognitoIdentityProviderClient } from '@aws-sdk/client-cognito-identity-provider'
 import { Inject, Injectable } from '@nestjs/common'
 
 @Injectable()
-@IdentityProvider(IdentityContext.AP)
-export class ApIdentityProviderClientService implements CognitoIdentityProviderClientWithPoolId {
+@IdentityProviderDecorator(IdentityContext.AP)
+export class ApIdentityProviderClientService implements IdentityProviderClientInterface {
   constructor(
     @Inject('AP_USER_POOL_ID') private readonly userPoolId: string,
     @Inject('AP_PROVIDER_CLIENT') private readonly client: CognitoIdentityProviderClient

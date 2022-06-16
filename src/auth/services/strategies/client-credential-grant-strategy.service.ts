@@ -1,16 +1,16 @@
 import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
 import { InvalidClientScopesException, InvalidCredentialsException, InvalidGrantTypeException } from '@app/auth/errors'
-import { IdentityProviderClient } from '@app/auth/interfaces'
-import { IdentityProviderService } from '@app/auth/services'
+import { IdentityProviderInterface } from '@app/auth/interfaces'
+import { AbstractIdentityProviderService } from '@app/auth/services/providers/abstract'
 import { AbstractGrantStrategy } from '@app/auth/services/strategies'
 import { Injectable } from '@nestjs/common'
 
 @Injectable()
 export class ClientCredentialGrantStrategyService extends AbstractGrantStrategy {
-  constructor(private readonly identityProvider: IdentityProviderService) {
+  constructor(private readonly identityProvider: AbstractIdentityProviderService) {
     super()
   }
-  private validateCredentials(request: OAuth2Request, client: IdentityProviderClient): Promise<boolean> {
+  private validateCredentials(request: OAuth2Request, client: IdentityProviderInterface): Promise<boolean> {
     if (client.clientSecret !== request.clientSecret || request.identityContext !== client.identityContext) {
       throw new InvalidCredentialsException()
     }

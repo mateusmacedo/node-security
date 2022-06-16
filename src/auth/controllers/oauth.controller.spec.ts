@@ -2,19 +2,19 @@ import { Oauth2Controller } from '@app/auth/controllers'
 import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
 import { GrantType, IdentityContext } from '@app/auth/enums'
 import { InvalidGrantTypeException } from '@app/auth/errors'
-import { Oauth2GrantStrategyInterface } from '@app/auth/interfaces'
-import { Oauth2GrantStrategyRegistry } from '@app/auth/services'
+import { GrantStrategyInterface } from '@app/auth/interfaces'
+import { GrantStrategyRegistry } from '@app/auth/services'
 import { createMock } from '@golevelup/nestjs-testing'
 import { InternalServerErrorException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 import { plainToClass } from 'class-transformer'
 
-describe('OauthController', () => {
+describe('Oauth2Controller', () => {
   let sut: Oauth2Controller
-  let strategyRegistry: Oauth2GrantStrategyRegistry
+  let strategyRegistry: GrantStrategyRegistry
   let request: OAuth2Request
   let response: OAuth2Response
-  let strategy: Oauth2GrantStrategyInterface
+  let strategy: GrantStrategyInterface
   beforeEach(async () => {
     jest.clearAllMocks()
     response = plainToClass(OAuth2Response, {
@@ -25,17 +25,17 @@ describe('OauthController', () => {
       scope: ['scope-1', 'scope-2'].toString(),
       identity_context: IdentityContext.AP
     })
-    strategy = createMock<Oauth2GrantStrategyInterface>()
-    strategyRegistry = createMock<Oauth2GrantStrategyRegistry>({
+    strategy = createMock<GrantStrategyInterface>()
+    strategyRegistry = createMock<GrantStrategyRegistry>({
       validate: jest.fn().mockResolvedValue(true),
       getOauth2Response: jest.fn().mockResolvedValue(response)
     })
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [Oauth2GrantStrategyRegistry],
+      providers: [GrantStrategyRegistry],
       controllers: [Oauth2Controller]
     })
-      .overrideProvider(Oauth2GrantStrategyRegistry)
+      .overrideProvider(GrantStrategyRegistry)
       .useValue(strategyRegistry)
       .compile()
 
