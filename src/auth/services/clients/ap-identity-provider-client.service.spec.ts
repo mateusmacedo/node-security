@@ -5,7 +5,7 @@ import { Test } from '@nestjs/testing'
 
 describe('ApIdentityProviderClientService', () => {
   let apIdentityProviderClientService: ApIdentityProviderClientService
-
+  let configService: ConfigService
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
@@ -41,11 +41,13 @@ describe('ApIdentityProviderClientService', () => {
     }).compile()
 
     apIdentityProviderClientService = moduleRef.get<ApIdentityProviderClientService>(ApIdentityProviderClientService)
+    configService = moduleRef.get<ConfigService>(ConfigService)
   })
 
   it('should be a derived instance of CognitoIdentityProviderClient', () => {
     expect(apIdentityProviderClientService).toBeDefined()
     expect(apIdentityProviderClientService).toBeInstanceOf(ApIdentityProviderClientService)
+    expect(apIdentityProviderClientService.getUserPoolId()).toBe(configService.get('AWS_COGNITO_AP_USER_POOL_ID'))
     expect(apIdentityProviderClientService.getClient()).toBeInstanceOf(CognitoIdentityProviderClient)
   })
 })
