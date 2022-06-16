@@ -5,15 +5,23 @@ import { CognitoIdentityProviderService } from '@app/auth/services/clients'
 import { IdentityProvider } from '@app/auth/services/clients/decorator'
 import { StrategyExplorerService } from '@app/common/services'
 import { CognitoIdentityProviderClient } from '@aws-sdk/client-cognito-identity-provider'
-import { createMock } from '@golevelup/nestjs-testing'
 import { Injectable } from '@nestjs/common'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 import { Test, TestingModule } from '@nestjs/testing'
 
 @Injectable()
 @IdentityProvider(IdentityContext.AP)
 class IdentityProviderClientServiceStub extends CognitoIdentityProviderClient {
-  constructor() {
-    super({})
+  constructor(private readonly configService: ConfigService) {
+    super({
+      region: configService.get('AWS_DEFAULT_REGION'),
+      credentials: {
+        accessKeyId: configService.get('AWS_ACCESS_KEY_ID'),
+        secretAccessKey: configService.get('AWS_SECRET_ACCESS_KEY')
+      },
+      endpoint:
+        configService.get('AWS_COGNITO_IDENTITY_PROVIDER_ENDPOINT') + configService.get('AWS_COGNITO_AP_USER_POOL_ID')
+    })
   }
 }
 
@@ -24,19 +32,14 @@ describe('CognitoIdentityProviderService', () => {
   beforeEach(async () => {
     jest.clearAllMocks()
     module = await Test.createTestingModule({
-      imports: [],
+      imports: [ConfigModule],
       controllers: [],
       providers: [
+        StrategyExplorerService,
+        IdentityProviderClientServiceStub,
         {
           provide: IdentityProviderService,
           useClass: CognitoIdentityProviderService
-        },
-        IdentityProviderClientServiceStub,
-        {
-          provide: StrategyExplorerService,
-          useValue: createMock<StrategyExplorerService>({
-            explore: jest.fn().mockReturnValue([IdentityProviderClientServiceStub])
-          })
         }
       ]
     }).compile()
@@ -45,6 +48,7 @@ describe('CognitoIdentityProviderService', () => {
       IdentityProviderService
     ) as CognitoIdentityProviderService
     explorer = module.get<StrategyExplorerService>(StrategyExplorerService)
+    cognitoIdentityProviderService.register(explorer.explore<CognitoIdentityProviderClient>(IDENTITY_PROVIDER_METADATA))
   })
 
   it('should be defined', () => {
@@ -55,11 +59,13 @@ describe('CognitoIdentityProviderService', () => {
     it('should register a grant client strategy', () => {
       const getSpy = jest.spyOn(cognitoIdentityProviderService['moduleRef'], 'get')
       const reflect = jest.spyOn(Reflect, 'getMetadata')
-      cognitoIdentityProviderService.register(explorer.explore(IDENTITY_PROVIDER_METADATA))
+      cognitoIdentityProviderService['registry'] = {}
+      cognitoIdentityProviderService.register(
+        explorer.explore<CognitoIdentityProviderClient>(IDENTITY_PROVIDER_METADATA)
+      )
       expect(cognitoIdentityProviderService['registry'][IdentityContext.AP]).toBeDefined()
       expect(getSpy).toHaveBeenCalledTimes(1)
       expect(getSpy).toHaveBeenCalledWith(IdentityProviderClientServiceStub, { strict: false })
-      expect(reflect).toHaveBeenCalledTimes(1)
       expect(reflect).toHaveBeenCalledWith(IDENTITY_PROVIDER_METADATA, IdentityProviderClientServiceStub)
     })
     it('should no have client strategies registered', () => {
