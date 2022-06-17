@@ -28,7 +28,7 @@ class GrantStrategyStub implements GrantStrategyInterface {
           scope: ['scope-1', 'scope-2'].toString(),
           identity_context: IdentityContext.AP
         })
-      : Promise.reject(new InvalidGrantTypeException())
+      : Promise.reject(new InvalidGrantTypeException(request.grantType))
   }
 }
 

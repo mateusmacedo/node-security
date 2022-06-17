@@ -55,7 +55,7 @@ describe('Oauth2Controller', () => {
     })
     it('should throw a error when cannot validate grant type', async () => {
       strategyRegistry.validate = jest.fn().mockResolvedValue(undefined)
-      await expect(sut.token(request)).rejects.toThrow(new InvalidGrantTypeException())
+      await expect(sut.token(request)).rejects.toThrow(new InvalidGrantTypeException(request.grantType))
     })
     it('should throw a error if strategyRegistry throws', async () => {
       strategyRegistry.validate = jest.fn().mockImplementationOnce(() => {

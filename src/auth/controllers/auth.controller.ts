@@ -11,7 +11,7 @@ export class Oauth2Controller {
   async token(@Query() request: OAuth2Request): Promise<OAuth2Response> {
     try {
       if (!(await this.strategyRegistry.validate(request))) {
-        throw new InvalidGrantTypeException()
+        throw new InvalidGrantTypeException(request.grantType)
       }
       return this.strategyRegistry.getOauth2Response(request)
     } catch (err) {
