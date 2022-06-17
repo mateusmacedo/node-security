@@ -50,7 +50,7 @@ export class OAuth2Response {
   })
   @Exclude()
   @IsNotEmpty()
-  refreshTokenExp: number
+  refreshTokenExp?: number
 
   @ApiProperty({
     type: String,
@@ -59,7 +59,7 @@ export class OAuth2Response {
   })
   @Expose({ name: 'scope' })
   @IsNotEmpty()
-  scope: string
+  scopes: string
 
   @ApiProperty({
     enum: IdentityContext,

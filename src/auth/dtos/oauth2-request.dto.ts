@@ -55,7 +55,7 @@ export class OAuth2Request {
   })
   @Expose({ name: 'scopes' })
   @IsNotEmpty()
-  scopes?: string | string[]
+  scopes: string | string[]
 
   @ApiProperty({
     type: String,
