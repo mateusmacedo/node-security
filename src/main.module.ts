@@ -8,7 +8,7 @@ import { Module } from '@nestjs/common'
       configModule: {
         ignoreEnvFile: process.env.NODE_ENV === 'production',
         envFilePath: process.env.ENV_FILE_PATH,
-        expandVariables: process.env.NODE_ENV === 'production',
+        expandVariables: process.env.NODE_ENV !== 'production',
         cache: process.env.NODE_ENV === 'production',
         isGlobal: true
       }
