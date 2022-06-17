@@ -1,21 +1,27 @@
 import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
-import { InvalidClientScopesException, InvalidCredentialsException, InvalidGrantTypeException } from '@app/auth/errors'
-import { IdentityProviderInterface } from '@app/auth/interfaces'
+import { GrantType } from '@app/auth/enums'
+import {
+  InvalidClientCredentialsException,
+  InvalidClientScopesException,
+  InvalidGrantTypeException
+} from '@app/auth/errors'
+import { IdentityProviderClientType, IdentityProviderInterface } from '@app/auth/interfaces'
 import { AbstractIdentityProviderService } from '@app/auth/services/providers/abstract'
-import { AbstractGrantStrategy } from '@app/auth/services/strategies'
+import { AbstractGrantStrategy, GrantStrategyDecorator } from '@app/auth/services/strategies'
 import { Injectable } from '@nestjs/common'
 
+@GrantStrategyDecorator(GrantType.CLIENT_CREDENTIALS)
 @Injectable()
 export class ClientCredentialGrantStrategyService extends AbstractGrantStrategy {
-  constructor(private readonly identityProvider: AbstractIdentityProviderService) {
+  constructor(private readonly identityProvider: AbstractIdentityProviderService<IdentityProviderClientType>) {
     super()
   }
   private validateCredentials(request: OAuth2Request, client: IdentityProviderInterface): Promise<boolean> {
-    if (client.clientSecret !== request.clientSecret || request.identityContext !== client.identityContext) {
-      throw new InvalidCredentialsException()
+    if (request.clientSecret !== client.clientSecret) {
+      throw new InvalidClientCredentialsException()
     }
     if (!client.allowedAuthFlow.includes(request.grantType)) {
-      throw new InvalidGrantTypeException()
+      throw new InvalidGrantTypeException(request.grantType)
     }
     const requestScopes = typeof request.scopes === 'string' ? [request.scopes] : request.scopes
     if (!requestScopes.every((scope) => client.clientScopes.includes(scope))) {
@@ -27,7 +33,7 @@ export class ClientCredentialGrantStrategyService extends AbstractGrantStrategy 
     const { clientId, identityContext } = request
     const clientIdentified = await this.identityProvider.identifyClient({ clientId, identityContext })
     if (!clientIdentified) {
-      throw new Error('Client not found')
+      throw new InvalidClientCredentialsException()
     }
     return this.validateCredentials(request, clientIdentified)
   }

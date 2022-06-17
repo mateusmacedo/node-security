@@ -5,7 +5,7 @@ import { IsNotEmpty } from 'class-validator'
 
 export class OAuth2Request {
   @ApiProperty({
-    type: GrantType,
+    enum: GrantType,
     description: 'The type of grant you are requesting, must be "client_credentials"',
     required: true
   })
@@ -27,6 +27,7 @@ export class OAuth2Request {
     description: 'The API Token given by the application',
     required: true
   })
+  @IsNotEmpty()
   @Expose({ name: 'client_secret' })
   clientSecret: string
 
@@ -75,7 +76,7 @@ export class OAuth2Request {
   password?: string
 
   @ApiProperty({
-    type: IdentityContext,
+    enum: IdentityContext,
     description: 'The identity context"'
   })
   @Expose({ name: 'identity_context' })

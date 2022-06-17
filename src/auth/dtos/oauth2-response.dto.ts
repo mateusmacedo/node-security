@@ -55,7 +55,7 @@ export class OAuth2Response {
   scope?: string
 
   @ApiProperty({
-    type: IdentityContext,
+    enum: IdentityContext,
     description: 'The identity context"'
   })
   @Expose({ name: 'identity_context' })

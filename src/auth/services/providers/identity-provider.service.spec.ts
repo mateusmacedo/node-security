@@ -1,6 +1,11 @@
 import { IDENTITY_PROVIDER_METADATA } from '@app/auth/constants'
 import { IdentityContext } from '@app/auth/enums'
-import { IdentityProviderClientInterface, IdentityProviderInterface } from '@app/auth/interfaces'
+import { InvalidContextException } from '@app/auth/errors'
+import {
+  IdentityProviderClientInterface,
+  IdentityProviderClientType,
+  IdentityProviderInterface
+} from '@app/auth/interfaces'
 import { IdentityProviderService } from '@app/auth/services/providers'
 import { AbstractIdentityProviderService } from '@app/auth/services/providers/abstract'
 import { IdentityProviderDecorator } from '@app/auth/services/providers/decorator'
@@ -74,7 +79,7 @@ describe('CognitoIdentityProviderService', () => {
       ]
     }).compile()
 
-    cognitoIdentityProviderService = module.get<AbstractIdentityProviderService>(
+    cognitoIdentityProviderService = module.get<AbstractIdentityProviderService<IdentityProviderClientType>>(
       AbstractIdentityProviderService
     ) as IdentityProviderService
     explorer = module.get<StrategyExplorerService>(StrategyExplorerService)
@@ -124,6 +129,14 @@ describe('CognitoIdentityProviderService', () => {
       expect(result.clientSecret).toEqual(identifyCommandOutput.UserPoolClient.ClientSecret)
       expect(result.clientScopes).toEqual(identifyCommandOutput.UserPoolClient.AllowedOAuthScopes)
       expect(result.allowedAuthFlow).toEqual(identifyCommandOutput.UserPoolClient.AllowedOAuthFlows)
+    })
+    it('should throw an error when invalid context is provided', async () => {
+      const clientData: Partial<IdentityProviderInterface> = {
+        identityContext: IdentityContext.PF
+      }
+      await expect(cognitoIdentityProviderService.identifyClient(clientData)).rejects.toThrow(
+        new InvalidContextException(IdentityContext.PF)
+      )
     })
   })
 })

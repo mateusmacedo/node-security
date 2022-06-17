@@ -1,24 +1,21 @@
 import { IDENTITY_PROVIDER_METADATA } from '@app/auth/constants'
 import { OAuth2Request } from '@app/auth/dtos'
+import { InvalidContextException } from '@app/auth/errors'
 import {
   IdentityProviderClientInterface,
-  IdentityProviderInterface,
-  StrategyRegistryInterface
+  IdentityProviderClientType,
+  IdentityProviderInterface
 } from '@app/auth/interfaces'
 import { AbstractIdentityProviderService } from '@app/auth/services/providers/abstract'
 import {
   DescribeUserPoolClientCommand,
   DescribeUserPoolClientCommandInput
 } from '@aws-sdk/client-cognito-identity-provider'
-import { Injectable, Type } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
 
-type IdentityProviderClientType = Type<IdentityProviderClientInterface>
 @Injectable()
-export class IdentityProviderService
-  extends AbstractIdentityProviderService
-  implements StrategyRegistryInterface<IdentityProviderClientType>
-{
+export class IdentityProviderService extends AbstractIdentityProviderService<IdentityProviderClientType> {
   private registry: { [s: string]: IdentityProviderClientInterface } = {}
 
   constructor(private readonly moduleRef: ModuleRef) {
@@ -44,6 +41,9 @@ export class IdentityProviderService
 
   async identifyClient(data: Partial<IdentityProviderInterface>): Promise<IdentityProviderInterface> {
     const { identityContext, clientId } = data
+    if (!(identityContext in this.registry)) {
+      throw new InvalidContextException(identityContext)
+    }
     const identifyClientCommandInput: DescribeUserPoolClientCommandInput = {
       UserPoolId: this.registry[identityContext].getUserPoolId(),
       ClientId: clientId

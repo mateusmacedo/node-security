@@ -1,7 +1,11 @@
 import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
 import { GrantType, IdentityContext } from '@app/auth/enums'
-import { InvalidClientScopesException, InvalidCredentialsException, InvalidGrantTypeException } from '@app/auth/errors'
-import { IdentityProviderInterface } from '@app/auth/interfaces'
+import {
+  InvalidClientCredentialsException,
+  InvalidClientScopesException,
+  InvalidGrantTypeException
+} from '@app/auth/errors'
+import { IdentityProviderClientType, IdentityProviderInterface } from '@app/auth/interfaces'
 import { AbstractIdentityProviderService } from '@app/auth/services/providers/abstract'
 import { ClientCredentialGrantStrategyService } from '@app/auth/services/strategies'
 import { createMock } from '@golevelup/nestjs-testing'
@@ -10,7 +14,7 @@ import { plainToClass } from 'class-transformer'
 
 describe('ClientCredentialGrantStrategyService', () => {
   let clientCredentialStrategy: ClientCredentialGrantStrategyService
-  let identityProviderService: AbstractIdentityProviderService
+  let identityProviderService: AbstractIdentityProviderService<IdentityProviderClientType>
   let request: OAuth2Request
   let identityProvider: IdentityProviderInterface
 
@@ -31,7 +35,7 @@ describe('ClientCredentialGrantStrategyService', () => {
       clientScopes: ['scope-1', 'scope-2'],
       identityContext: IdentityContext.AP
     }
-    identityProviderService = createMock<AbstractIdentityProviderService>({
+    identityProviderService = createMock<AbstractIdentityProviderService<IdentityProviderClientType>>({
       identifyClient: jest.fn().mockResolvedValue(identityProvider),
       createAccessToken: jest.fn().mockResolvedValue('access-token')
     })
@@ -48,7 +52,9 @@ describe('ClientCredentialGrantStrategyService', () => {
     }).compile()
 
     clientCredentialStrategy = moduleRef.get<ClientCredentialGrantStrategyService>(ClientCredentialGrantStrategyService)
-    identityProviderService = moduleRef.get<AbstractIdentityProviderService>(AbstractIdentityProviderService)
+    identityProviderService = moduleRef.get<AbstractIdentityProviderService<IdentityProviderClientType>>(
+      AbstractIdentityProviderService
+    )
   })
 
   it('should be defined', () => {
@@ -73,11 +79,13 @@ describe('ClientCredentialGrantStrategyService', () => {
     })
     it('should throw a error if client credentials is not valid', async () => {
       let invalidRequest = { ...request, clientSecret: 'invalid-secret' }
-      await expect(clientCredentialStrategy.validate(invalidRequest)).rejects.toThrow(new InvalidCredentialsException())
-      invalidRequest = { ...request, identityContext: 'invalid-context' as any }
-      await expect(clientCredentialStrategy.validate(invalidRequest)).rejects.toThrow(new InvalidCredentialsException())
+      await expect(clientCredentialStrategy.validate(invalidRequest)).rejects.toThrow(
+        new InvalidClientCredentialsException()
+      )
       invalidRequest = { ...request, grantType: 'invalid-grant-type' as any }
-      await expect(clientCredentialStrategy.validate(invalidRequest)).rejects.toThrow(new InvalidGrantTypeException())
+      await expect(clientCredentialStrategy.validate(invalidRequest)).rejects.toThrow(
+        new InvalidGrantTypeException(invalidRequest.grantType)
+      )
       invalidRequest = { ...request, scopes: ['scope-1', 'scope-2', 'scope-3'] }
       await expect(clientCredentialStrategy.validate(invalidRequest)).rejects.toThrow(
         new InvalidClientScopesException()
