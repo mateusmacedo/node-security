@@ -3,7 +3,7 @@ import { HealthController } from '@app/common/controllers'
 import { loggerFactory } from '@app/common/factories/logger.factory'
 import { CommonModuleOptions } from '@app/common/interfaces'
 import { CorrelationIdMiddleware } from '@app/common/middlewares'
-import { AppConfigService, HealthService } from '@app/common/services'
+import { AppConfigService, HealthService, StrategyExplorerService } from '@app/common/services'
 import {
   ActiveHandlesMetric,
   ActiveHandlesTotalMetric,
@@ -106,9 +106,9 @@ export class CommonModule {
           instrumentations: [getNodeAutoInstrumentations()]
         })
       ],
-      providers: [CorrelationIdMiddleware, HealthService, AppConfigService],
+      providers: [StrategyExplorerService, CorrelationIdMiddleware, HealthService, AppConfigService],
       controllers: [HealthController],
-      exports: [AppConfigService]
+      exports: [StrategyExplorerService, AppConfigService]
     }
   }
 }
