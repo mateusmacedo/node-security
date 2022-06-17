@@ -1,5 +1,6 @@
 import { IDENTITY_PROVIDER_METADATA } from '@app/auth/constants'
-import { IdentityContext } from '@app/auth/enums'
+import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
+import { GrantType, IdentityContext } from '@app/auth/enums'
 import { InvalidContextException } from '@app/auth/errors'
 import {
   IdentityProviderClientInterface,
@@ -12,7 +13,8 @@ import { IdentityProviderDecorator } from '@app/auth/services/providers/decorato
 import { StrategyExplorerService } from '@app/common/services'
 import {
   CognitoIdentityProviderClient,
-  DescribeUserPoolClientCommandOutput
+  DescribeUserPoolClientCommandOutput,
+  InitiateAuthCommandOutput
 } from '@aws-sdk/client-cognito-identity-provider'
 import { createMock } from '@golevelup/nestjs-testing'
 import { Injectable } from '@nestjs/common'
@@ -37,6 +39,10 @@ describe('CognitoIdentityProviderService', () => {
   let explorer: StrategyExplorerService
   let module: TestingModule
   let identifyCommandOutput: DescribeUserPoolClientCommandOutput
+  let initiateAuthCommandOutput: InitiateAuthCommandOutput
+  let request: OAuth2Request
+  let response: OAuth2Response
+  let client: CognitoIdentityProviderClient
   beforeEach(async () => {
     jest.clearAllMocks()
     identifyCommandOutput = {
@@ -51,6 +57,34 @@ describe('CognitoIdentityProviderService', () => {
         UserPoolId: 'userPoolId'
       }
     }
+    initiateAuthCommandOutput = {
+      $metadata: undefined,
+      AuthenticationResult: {
+        AccessToken: 'accessToken',
+        ExpiresIn: 3600,
+        IdToken: 'idToken',
+        RefreshToken: 'refreshToken',
+        TokenType: 'tokenType'
+      }
+    }
+    request = {
+      clientId: 'clientId',
+      clientSecret: 'clientSecret',
+      grantType: GrantType.CLIENT_CREDENTIALS,
+      identityContext: IdentityContext.AP,
+      scopes: ['scope'],
+      username: 'username',
+      password: 'password'
+    }
+    response = {
+      accessToken: 'accessToken',
+      accessTokenExp: 3600,
+      refreshToken: 'refreshToken',
+      tokenType: 'tokenType',
+      identityContext: IdentityContext.AP,
+      scopes: 'scope'
+    }
+    client = createMock<CognitoIdentityProviderClient>()
     module = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
@@ -65,9 +99,6 @@ describe('CognitoIdentityProviderService', () => {
           inject: [ConfigService],
           provide: IdentityProviderClientServiceStub,
           useFactory: (configService: ConfigService) => {
-            const client = createMock<CognitoIdentityProviderClient>({
-              send: jest.fn().mockResolvedValue(identifyCommandOutput)
-            })
             const userPoolId = configService.get('AWS_COGNITO_AP_USER_POOL_ID')
             return new IdentityProviderClientServiceStub(userPoolId, client)
           }
@@ -122,6 +153,7 @@ describe('CognitoIdentityProviderService', () => {
         clientId: '3e67tihr5n17r4g1nkoi18s8bq',
         identityContext: IdentityContext.AP
       }
+      client.send = jest.fn().mockResolvedValueOnce(identifyCommandOutput)
       const result = await cognitoIdentityProviderService.identifyClient(clientData)
       expect(result).toBeDefined()
       expect(result.clientId).toEqual(identifyCommandOutput.UserPoolClient.ClientId)
@@ -137,6 +169,21 @@ describe('CognitoIdentityProviderService', () => {
       await expect(cognitoIdentityProviderService.identifyClient(clientData)).rejects.toThrow(
         new InvalidContextException(IdentityContext.PF)
       )
+    })
+  })
+  describe('createAccessToken', () => {
+    it('should createAccessToken successfully', async () => {
+      client.send = jest
+        .fn()
+        .mockResolvedValueOnce({ ...initiateAuthCommandOutput, ChallengeName: 'NEW_PASSWORD_REQUIRED' })
+        .mockResolvedValueOnce(initiateAuthCommandOutput)
+      const result = await cognitoIdentityProviderService.createAccessToken(request)
+      expect(result).toBeDefined()
+      expect(result.accessToken).toBeDefined()
+      expect(result.tokenType).toBeDefined()
+      expect(result.refreshToken).toBeDefined()
+      expect(result.accessTokenExp).toBeDefined()
+      expect(result.idToken).toBeDefined()
     })
   })
 })
