@@ -1,6 +1,7 @@
 import { IdentityContext } from '@app/auth/enums'
 import { ApiProperty } from '@nestjs/swagger'
 import { Exclude, Expose } from 'class-transformer'
+import { IsNotEmpty } from 'class-validator'
 
 /**
  * Main object used to transport data
@@ -12,6 +13,7 @@ export class OAuth2Response {
     required: true
   })
   @Expose({ name: 'access_token' })
+  @IsNotEmpty()
   accessToken: string
 
   @ApiProperty({
@@ -20,6 +22,7 @@ export class OAuth2Response {
     required: true
   })
   @Expose({ name: 'token_type' })
+  @IsNotEmpty()
   tokenType = 'bearer'
 
   @ApiProperty({
@@ -28,6 +31,7 @@ export class OAuth2Response {
     required: true
   })
   @Expose({ name: 'refresh_token' })
+  @IsNotEmpty()
   refreshToken: string
 
   @ApiProperty({
@@ -36,14 +40,16 @@ export class OAuth2Response {
     required: true
   })
   @Expose({ name: 'expires_in' })
+  @IsNotEmpty()
   accessTokenExp: number
 
   @ApiProperty({
     type: Number,
-    description: 'The list of the permissions (tpApps) that the application requests.',
+    description: 'Number of seconds until the refresh token expires',
     required: true
   })
   @Exclude()
+  @IsNotEmpty()
   refreshTokenExp: number
 
   @ApiProperty({
@@ -52,12 +58,15 @@ export class OAuth2Response {
     required: true
   })
   @Expose({ name: 'scope' })
-  scope?: string
+  @IsNotEmpty()
+  scope: string
 
   @ApiProperty({
     enum: IdentityContext,
-    description: 'The identity context"'
+    description: 'The identity context',
+    required: true
   })
   @Expose({ name: 'identity_context' })
-  identityContext?: IdentityContext
+  @IsNotEmpty()
+  identityContext: IdentityContext
 }

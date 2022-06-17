@@ -1,7 +1,7 @@
 import { GrantType, IdentityContext } from '@app/auth/enums'
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
-import { IsNotEmpty } from 'class-validator'
+import { IsNotEmpty, IsOptional } from 'class-validator'
 
 export class OAuth2Request {
   @ApiProperty({
@@ -9,8 +9,8 @@ export class OAuth2Request {
     description: 'The type of grant you are requesting, must be "client_credentials"',
     required: true
   })
-  @IsNotEmpty()
   @Expose({ name: 'grant_type' })
+  @IsNotEmpty()
   grantType: GrantType
 
   @ApiProperty({
@@ -18,8 +18,8 @@ export class OAuth2Request {
     description: 'The API Key given by the application',
     required: true
   })
-  @IsNotEmpty()
   @Expose({ name: 'client_id' })
+  @IsNotEmpty()
   clientId: string
 
   @ApiProperty({
@@ -27,8 +27,8 @@ export class OAuth2Request {
     description: 'The API Token given by the application',
     required: true
   })
-  @IsNotEmpty()
   @Expose({ name: 'client_secret' })
+  @IsNotEmpty()
   clientSecret: string
 
   @ApiProperty({
@@ -37,6 +37,7 @@ export class OAuth2Request {
       'The expiration time of the assertion, specified as seconds since 00:00:00 UTC, January 1, 1970. This value has a maximum of 1 hour after the issued time.'
   })
   @Expose({ name: 'exp' })
+  @IsOptional()
   exp?: number
 
   @ApiProperty({
@@ -44,6 +45,7 @@ export class OAuth2Request {
     description: 'The time the assertion was issued, specified as seconds since 00:00:00 UTC, January 1, 1970.'
   })
   @Expose({ name: 'iat' })
+  @IsOptional()
   iat?: number
 
   @ApiProperty({
@@ -52,6 +54,7 @@ export class OAuth2Request {
     isArray: true
   })
   @Expose({ name: 'scopes' })
+  @IsNotEmpty()
   scopes?: string | string[]
 
   @ApiProperty({
@@ -59,6 +62,7 @@ export class OAuth2Request {
     description: 'The refresh token only when grant_type is set to "refresh_token"'
   })
   @Expose({ name: 'refresh_token' })
+  @IsOptional()
   refreshToken?: string
 
   @ApiProperty({
@@ -66,6 +70,7 @@ export class OAuth2Request {
     description: 'The username only when grant_type is set to "password_grant"'
   })
   @Expose({ name: 'username' })
+  @IsOptional()
   username?: string
 
   @ApiProperty({
@@ -73,6 +78,7 @@ export class OAuth2Request {
     description: 'The password when grant_type is set to "password_grant"'
   })
   @Expose({ name: 'password' })
+  @IsOptional()
   password?: string
 
   @ApiProperty({
@@ -80,5 +86,6 @@ export class OAuth2Request {
     description: 'The identity context"'
   })
   @Expose({ name: 'identity_context' })
-  identityContext?: IdentityContext
+  @IsNotEmpty()
+  identityContext: IdentityContext
 }
