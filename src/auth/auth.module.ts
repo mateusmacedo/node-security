@@ -1,5 +1,5 @@
 import { GRANT_STRATEGY_METADATA, IDENTITY_PROVIDER_METADATA } from '@app/auth/constants'
-import { Oauth2Controller } from '@app/auth/controllers/auth.controller'
+import { ApProtectedController, Oauth2Controller } from '@app/auth/controllers'
 import {
   GrantStrategyInterface,
   IdentityProviderClientInterface,
@@ -18,6 +18,7 @@ import { PassportModule } from '@nestjs/passport'
 @Module({
   imports: [PassportModule.register({ defaultStrategy: 'jwt' })],
   providers: [
+    JwtStrategy,
     StrategyExplorerService,
     GrantStrategyRegistry,
     {
@@ -47,7 +48,7 @@ import { PassportModule } from '@nestjs/passport'
     },
     ClientCredentialGrantStrategyService
   ],
-  controllers: [Oauth2Controller],
+  controllers: [Oauth2Controller, ApProtectedController],
   exports: [PassportModule, JwtStrategy]
 })
 export class AuthModule implements OnModuleInit {
