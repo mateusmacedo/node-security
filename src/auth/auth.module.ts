@@ -6,15 +6,17 @@ import {
   IdentityProviderClientType
 } from '@app/auth/interfaces'
 import { GrantStrategyRegistry } from '@app/auth/services'
-import { ApIdentityProviderClientService, IdentityProviderService } from '@app/auth/services/providers'
+import { ApIdentityProviderClientService, CognitoIdentityProviderService } from '@app/auth/services/providers'
 import { AbstractIdentityProviderService } from '@app/auth/services/providers/abstract'
-import { ClientCredentialGrantStrategyService } from '@app/auth/services/strategies'
+import { ClientCredentialGrantStrategyService, JwtStrategy } from '@app/auth/services/strategies'
 import { StrategyExplorerService } from '@app/common/services'
 import { CognitoIdentityProviderClient } from '@aws-sdk/client-cognito-identity-provider'
 import { Module, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { PassportModule } from '@nestjs/passport'
 
 @Module({
+  imports: [PassportModule.register({ defaultStrategy: 'jwt' })],
   providers: [
     StrategyExplorerService,
     GrantStrategyRegistry,
@@ -41,11 +43,12 @@ import { ConfigService } from '@nestjs/config'
     ApIdentityProviderClientService,
     {
       provide: AbstractIdentityProviderService,
-      useClass: IdentityProviderService
+      useClass: CognitoIdentityProviderService
     },
     ClientCredentialGrantStrategyService
   ],
-  controllers: [Oauth2Controller]
+  controllers: [Oauth2Controller],
+  exports: [PassportModule, JwtStrategy]
 })
 export class AuthModule implements OnModuleInit {
   constructor(
