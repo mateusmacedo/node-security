@@ -7,7 +7,7 @@ import {
   IdentityProviderClientType,
   IdentityProviderInterface
 } from '@app/auth/interfaces'
-import { IdentityProviderService } from '@app/auth/services/providers'
+import { CognitoIdentityProviderService } from '@app/auth/services/providers'
 import { AbstractIdentityProviderService } from '@app/auth/services/providers/abstract'
 import { IdentityProviderDecorator } from '@app/auth/services/providers/decorator'
 import { StrategyExplorerService } from '@app/common/services'
@@ -34,7 +34,7 @@ class IdentityProviderClientServiceStub implements IdentityProviderClientInterfa
 }
 
 describe('CognitoIdentityProviderService', () => {
-  let cognitoIdentityProviderService: IdentityProviderService
+  let cognitoIdentityProviderService: CognitoIdentityProviderService
   let identityProviderClientServiceStub: IdentityProviderClientServiceStub
   let explorer: StrategyExplorerService
   let module: TestingModule
@@ -105,14 +105,14 @@ describe('CognitoIdentityProviderService', () => {
         },
         {
           provide: AbstractIdentityProviderService,
-          useClass: IdentityProviderService
+          useClass: CognitoIdentityProviderService
         }
       ]
     }).compile()
 
     cognitoIdentityProviderService = module.get<AbstractIdentityProviderService<IdentityProviderClientType>>(
       AbstractIdentityProviderService
-    ) as IdentityProviderService
+    ) as CognitoIdentityProviderService
     explorer = module.get<StrategyExplorerService>(StrategyExplorerService)
     identityProviderClientServiceStub = module.get<IdentityProviderClientServiceStub>(IdentityProviderClientServiceStub)
     cognitoIdentityProviderService.register(

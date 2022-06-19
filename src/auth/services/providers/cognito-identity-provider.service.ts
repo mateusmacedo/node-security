@@ -22,7 +22,7 @@ import { ModuleRef } from '@nestjs/core'
 import * as crypto from 'crypto'
 
 @Injectable()
-export class IdentityProviderService extends AbstractIdentityProviderService<IdentityProviderClientType> {
+export class CognitoIdentityProviderService extends AbstractIdentityProviderService<IdentityProviderClientType> {
   private registry: { [s: string]: IdentityProviderClientInterface } = {}
 
   constructor(private readonly moduleRef: ModuleRef) {
