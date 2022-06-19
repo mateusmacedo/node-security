@@ -1,3 +1,4 @@
+import { JwtTokenInterface } from '@app/auth/interfaces'
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { PassportStrategy } from '@nestjs/passport'
@@ -19,7 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     })
   }
 
-  public async validate(payload: unknown) {
+  public async validate(payload: JwtTokenInterface) {
     return payload !== undefined
   }
 }

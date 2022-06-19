@@ -1,4 +1,6 @@
+import { JwtTokenInterface } from '@app/auth/interfaces'
 import { JwtStrategy } from '@app/auth/services/strategies'
+import { createMock } from '@golevelup/nestjs-testing'
 import { ConfigService } from '@nestjs/config'
 import { mock } from 'jest-mock-extended'
 
@@ -18,7 +20,7 @@ describe('JwtStrategy', () => {
   })
   describe('validate', () => {
     it('should return payload', async () => {
-      const payload = {}
+      const payload = createMock<JwtTokenInterface>()
       const result = await jwtStrategy.validate(payload)
       expect(result).toEqual(true)
     })
