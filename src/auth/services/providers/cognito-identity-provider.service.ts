@@ -1,6 +1,6 @@
 import { IDENTITY_PROVIDER_METADATA } from '@app/auth/constants'
 import { OAuth2Request } from '@app/auth/dtos'
-import { IdentityContext } from '@app/auth/enums'
+import { GrantType, IdentityContext } from '@app/auth/enums'
 import { InvalidContextException } from '@app/auth/errors'
 import {
   IdentityProviderAccessTokenInterface,
@@ -14,8 +14,10 @@ import {
   DescribeUserPoolClientCommandInput,
   InitiateAuthCommand,
   InitiateAuthCommandInput,
+  InitiateAuthCommandOutput,
   RespondToAuthChallengeCommand,
-  RespondToAuthChallengeCommandInput
+  RespondToAuthChallengeCommandInput,
+  RespondToAuthChallengeCommandOutput
 } from '@aws-sdk/client-cognito-identity-provider'
 import { Injectable } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
@@ -48,37 +50,67 @@ export class CognitoIdentityProviderService extends AbstractIdentityProviderServ
     }
   }
 
-  async createAccessToken(request: OAuth2Request): Promise<IdentityProviderAccessTokenInterface> {
-    const { identityContext, username, password, clientId } = request
-    this.validateIdentityContext(identityContext)
-    const hash = crypto
+  private createSecretHash(request: OAuth2Request): string {
+    return crypto
       .createHmac('sha256', request.clientSecret)
       .update(`${request.username}${request.clientId}`)
       .digest('base64')
-    const inputInitiateAuthCommand: InitiateAuthCommandInput = {
-      AuthFlow: 'USER_PASSWORD_AUTH',
-      AuthParameters: {
-        USERNAME: username,
-        PASSWORD: password,
-        SECRET_HASH: hash
-      },
-      ClientId: clientId
-    }
-    const initiateAuthCommand = new InitiateAuthCommand(inputInitiateAuthCommand)
-    const result = await this.registry[identityContext].getClient().send(initiateAuthCommand)
-    if (result.ChallengeName !== undefined) {
-      const inputCommand: RespondToAuthChallengeCommandInput = {
-        ClientId: clientId,
-        ChallengeName: result.ChallengeName,
-        ChallengeResponses: {
+  }
+
+  private createInitiateAuthCommandInput(request: OAuth2Request, hash: string): InitiateAuthCommandInput {
+    const { identityContext, clientId, username, password } = request
+    this.validateIdentityContext(identityContext)
+    if (request.grantType === GrantType.CLIENT_CREDENTIALS) {
+      return {
+        AuthFlow: 'USER_PASSWORD_AUTH',
+        AuthParameters: {
           USERNAME: username,
-          SECRET_HASH: hash,
-          NEW_PASSWORD: password
+          PASSWORD: password,
+          SECRET_HASH: hash
         },
-        Session: result.Session
+        ClientId: clientId
       }
-      const command = new RespondToAuthChallengeCommand(inputCommand)
-      const resultChallenge = await this.registry[identityContext].getClient().send(command)
+    }
+    // if (request.grantType === GrantType.REFRESH_TOKEN) {
+    //   return {
+    //     AuthFlow: 'REFRESH_TOKEN_AUTH',
+    //     AuthParameters: {
+    //       REFRESH_TOKEN: request.refreshToken,
+    //       SECRET_HASH: hash
+    //     },
+    //     ClientId: clientId
+    //   }
+    // }
+  }
+
+  private async respondToAuthChallenge(
+    request: OAuth2Request,
+    result: InitiateAuthCommandOutput,
+    hash: string
+  ): Promise<RespondToAuthChallengeCommandOutput> {
+    const { identityContext, clientId, username, password } = request
+    const inputCommand: RespondToAuthChallengeCommandInput = {
+      ClientId: clientId,
+      ChallengeName: result.ChallengeName,
+      ChallengeResponses: {
+        USERNAME: username,
+        SECRET_HASH: hash,
+        NEW_PASSWORD: password
+      },
+      Session: result.Session
+    }
+    const command = new RespondToAuthChallengeCommand(inputCommand)
+    return this.registry[identityContext].getClient().send(command)
+  }
+
+  async createAccessToken(request: OAuth2Request): Promise<IdentityProviderAccessTokenInterface> {
+    this.validateIdentityContext(request.identityContext)
+    const hash = this.createSecretHash(request)
+    const inputInitiateAuthCommand = this.createInitiateAuthCommandInput(request, hash)
+    const initiateAuthCommand = new InitiateAuthCommand(inputInitiateAuthCommand)
+    const result = await this.registry[request.identityContext].getClient().send(initiateAuthCommand)
+    if (result.ChallengeName !== undefined) {
+      const resultChallenge = await this.respondToAuthChallenge(request, result, hash)
       result.AuthenticationResult = resultChallenge.AuthenticationResult
     }
     return {
