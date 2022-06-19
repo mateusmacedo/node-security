@@ -21,7 +21,7 @@ import {
 } from '@aws-sdk/client-cognito-identity-provider'
 import { Injectable } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
-import * as crypto from 'crypto'
+import crypto from 'crypto'
 
 @Injectable()
 export class CognitoIdentityProviderService extends AbstractIdentityProviderService<IdentityProviderClientType> {

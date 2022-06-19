@@ -33,7 +33,7 @@ import { JaegerPropagator } from '@opentelemetry/propagator-jaeger'
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { AcceptLanguageResolver, I18nModule, QueryResolver } from 'nestjs-i18n'
 import { LoggerModule } from 'nestjs-pino'
-import * as path from 'path'
+import path from 'path'
 
 @Module({})
 export class CommonModule {
