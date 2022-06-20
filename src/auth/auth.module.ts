@@ -8,7 +8,11 @@ import {
 import { GrantStrategyRegistry } from '@app/auth/services'
 import { ApIdentityProviderClientService, CognitoIdentityProviderService } from '@app/auth/services/providers'
 import { AbstractIdentityProviderService } from '@app/auth/services/providers/abstract'
-import { ClientCredentialGrantStrategyService, JwtStrategy } from '@app/auth/services/strategies'
+import {
+  ClientCredentialGrantStrategyService,
+  JwtStrategy,
+  RefreshTokenGrantStrategyService
+} from '@app/auth/services/strategies'
 import { StrategyExplorerService } from '@app/common/services'
 import { CognitoIdentityProviderClient } from '@aws-sdk/client-cognito-identity-provider'
 import { Module, OnModuleInit } from '@nestjs/common'
@@ -46,7 +50,8 @@ import { PassportModule } from '@nestjs/passport'
       provide: AbstractIdentityProviderService,
       useClass: CognitoIdentityProviderService
     },
-    ClientCredentialGrantStrategyService
+    ClientCredentialGrantStrategyService,
+    RefreshTokenGrantStrategyService
   ],
   controllers: [Oauth2Controller, ApProtectedController],
   exports: [PassportModule, JwtStrategy]

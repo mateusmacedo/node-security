@@ -31,58 +31,6 @@ export class CognitoIdentityProviderService extends AbstractIdentityProviderServ
     super()
   }
 
-  register(strategies: IdentityProviderClientType[]): void {
-    strategies.forEach((strategy) => {
-      const instance = this.moduleRef.get(strategy, {
-        strict: false
-      })
-      if (!instance) {
-        return
-      }
-      const strategyName = Reflect.getMetadata(IDENTITY_PROVIDER_METADATA, strategy)
-      this.registry[strategyName] = instance
-    })
-  }
-
-  private validateIdentityContext(identityContext: IdentityContext): void {
-    if (!(identityContext in this.registry)) {
-      throw new InvalidContextException(identityContext)
-    }
-  }
-
-  private createSecretHash(request: OAuth2Payload): string {
-    return crypto
-      .createHmac('sha256', request.clientSecret)
-      .update(`${request.username}${request.clientId}`)
-      .digest('base64')
-  }
-
-  private createInitiateAuthCommandInput(request: OAuth2Payload, hash: string): InitiateAuthCommandInput {
-    const { identityContext, clientId, username, password } = request
-    this.validateIdentityContext(identityContext)
-    if (request.grantType === GrantType.CLIENT_CREDENTIALS) {
-      return {
-        AuthFlow: 'USER_PASSWORD_AUTH',
-        AuthParameters: {
-          USERNAME: username,
-          PASSWORD: password,
-          SECRET_HASH: hash
-        },
-        ClientId: clientId
-      }
-    }
-    // if (request.grantType === GrantType.REFRESH_TOKEN) {
-    //   return {
-    //     AuthFlow: 'REFRESH_TOKEN_AUTH',
-    //     AuthParameters: {
-    //       REFRESH_TOKEN: request.refreshToken,
-    //       SECRET_HASH: hash
-    //     },
-    //     ClientId: clientId
-    //   }
-    // }
-  }
-
   private async respondToAuthChallenge(
     request: OAuth2Payload,
     result: InitiateAuthCommandOutput,
@@ -101,6 +49,45 @@ export class CognitoIdentityProviderService extends AbstractIdentityProviderServ
     }
     const command = new RespondToAuthChallengeCommand(inputCommand)
     return this.registry[identityContext].getClient().send(command)
+  }
+
+  private createInitiateAuthCommandInput(request: OAuth2Payload, hash: string): InitiateAuthCommandInput {
+    const { identityContext, clientId, username, password } = request
+    this.validateIdentityContext(identityContext)
+    if (request.grantType === GrantType.CLIENT_CREDENTIALS) {
+      return {
+        AuthFlow: 'USER_PASSWORD_AUTH',
+        AuthParameters: {
+          USERNAME: username,
+          PASSWORD: password,
+          SECRET_HASH: hash
+        },
+        ClientId: clientId
+      }
+    }
+    if (request.grantType === GrantType.REFRESH_TOKEN) {
+      return {
+        AuthFlow: 'REFRESH_TOKEN_AUTH',
+        AuthParameters: {
+          REFRESH_TOKEN: request.refreshToken,
+          SECRET_HASH: hash
+        },
+        ClientId: clientId
+      }
+    }
+  }
+
+  private createSecretHash(request: OAuth2Payload): string {
+    return crypto
+      .createHmac('sha256', request.clientSecret)
+      .update(`${request.username}${request.clientId}`)
+      .digest('base64')
+  }
+
+  private validateIdentityContext(identityContext: IdentityContext): void {
+    if (!(identityContext in this.registry)) {
+      throw new InvalidContextException(identityContext)
+    }
   }
 
   async createAccessToken(request: OAuth2Payload): Promise<IdentityProviderAccessTokenInterface> {
@@ -138,5 +125,18 @@ export class CognitoIdentityProviderService extends AbstractIdentityProviderServ
       clientScopes: result.UserPoolClient.AllowedOAuthScopes,
       clientSecret: result.UserPoolClient.ClientSecret
     } as IdentityProviderInterface
+  }
+
+  register(strategies: IdentityProviderClientType[]): void {
+    strategies.forEach((strategy) => {
+      const instance = this.moduleRef.get(strategy, {
+        strict: false
+      })
+      if (!instance) {
+        return
+      }
+      const strategyName = Reflect.getMetadata(IDENTITY_PROVIDER_METADATA, strategy)
+      this.registry[strategyName] = instance
+    })
   }
 }
