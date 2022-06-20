@@ -176,5 +176,17 @@ describe('CognitoIdentityProviderService', () => {
       expect(result.accessTokenExp).toBeDefined()
       expect(result.idToken).toBeDefined()
     })
+    it('should createAccessToken successfully from refreshToken', async () => {
+      payload.grantType = GrantType.REFRESH_TOKEN
+      payload.refreshToken = 'refreshToken'
+      client.send = jest.fn().mockResolvedValueOnce(initiateAuthCommandOutput)
+      const result = await cognitoIdentityProviderService.createAccessToken(payload)
+      expect(result).toBeDefined()
+      expect(result.accessToken).toBeDefined()
+      expect(result.tokenType).toBeDefined()
+      expect(result.refreshToken).toBeDefined()
+      expect(result.accessTokenExp).toBeDefined()
+      expect(result.idToken).toBeDefined()
+    })
   })
 })
