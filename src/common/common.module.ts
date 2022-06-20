@@ -69,7 +69,7 @@ export class CommonModule {
           useFactory: loggerFactory
         }),
         OpenTelemetryModule.forRoot({
-          applicationName: 'nestjs-startkit',
+          applicationName: 'node-security',
           traceAutoInjectors: [
             ControllerInjector,
             GuardInjector,

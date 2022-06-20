@@ -7,13 +7,23 @@ import { LoggerModule, PinoLogger } from 'nestjs-pino'
 describe('LogExecutionDecorator', () => {
   class DummyClass {
     @LogExecution()
-    async dummyMethod(data: string) {
+    async asyncDummyMethod(data: string) {
+      return data
+    }
+
+    @LogExecution()
+    dummyMethod(data: string) {
       return data
     }
   }
   let sut: DummyClass
   const mockConfigService = createMock<ConfigService>({
-    get: jest.fn(() => 'runMock')
+    get: jest.fn((key: string) => {
+      if (key === 'NODE_ENV') {
+        return 'test'
+      }
+      return 'development'
+    })
   })
   const mockLogger = createMock<PinoLogger>({
     info: jest.fn().mockReturnValue(undefined)
@@ -42,9 +52,17 @@ describe('LogExecutionDecorator', () => {
     expect(sut).toBeDefined()
   })
   describe('LogExecution', () => {
-    it('should process logging flow correctly', async () => {
+    it('should process logging flow correctly when async', async () => {
+      const spy = jest.spyOn(sut, 'asyncDummyMethod')
+      expect(await sut.asyncDummyMethod('dummy')).toBe('dummy')
+      expect(spy).toHaveBeenCalledTimes(1)
+      expect(spy).toHaveBeenCalledWith('dummy')
+      expect(mockLogger.info).toHaveBeenCalledTimes(1)
+      expect(mockLogger.info).toBeCalledWith({ data: ['dummy'], result: 'dummy' })
+    })
+    it('should process logging flow correctly', () => {
       const spy = jest.spyOn(sut, 'dummyMethod')
-      expect(await sut.dummyMethod('dummy')).toBe('dummy')
+      expect(sut.dummyMethod('dummy')).toBe('dummy')
       expect(spy).toHaveBeenCalledTimes(1)
       expect(spy).toHaveBeenCalledWith('dummy')
       expect(mockLogger.info).toHaveBeenCalledTimes(1)
