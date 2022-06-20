@@ -1,11 +1,11 @@
 import { IDENTITY_PROVIDER_METADATA } from '@app/auth/constants'
-import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
 import { GrantType, IdentityContext } from '@app/auth/enums'
 import { InvalidContextException } from '@app/auth/errors'
 import {
   IdentityProviderClientInterface,
   IdentityProviderClientType,
-  IdentityProviderInterface
+  IdentityProviderInterface,
+  OAuth2Payload
 } from '@app/auth/interfaces'
 import { CognitoIdentityProviderService } from '@app/auth/services/providers'
 import { AbstractIdentityProviderService } from '@app/auth/services/providers/abstract'
@@ -40,8 +40,7 @@ describe('CognitoIdentityProviderService', () => {
   let module: TestingModule
   let identifyCommandOutput: DescribeUserPoolClientCommandOutput
   let initiateAuthCommandOutput: InitiateAuthCommandOutput
-  let request: OAuth2Request
-  let response: OAuth2Response
+  let payload: OAuth2Payload
   let client: CognitoIdentityProviderClient
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -67,7 +66,7 @@ describe('CognitoIdentityProviderService', () => {
         TokenType: 'tokenType'
       }
     }
-    request = {
+    payload = {
       clientId: 'clientId',
       clientSecret: 'clientSecret',
       grantType: GrantType.CLIENT_CREDENTIALS,
@@ -75,14 +74,6 @@ describe('CognitoIdentityProviderService', () => {
       scopes: ['scope'],
       username: 'username',
       password: 'password'
-    }
-    response = {
-      accessToken: 'accessToken',
-      accessTokenExp: 3600,
-      refreshToken: 'refreshToken',
-      tokenType: 'tokenType',
-      identityContext: IdentityContext.AP,
-      scopes: 'scope'
     }
     client = createMock<CognitoIdentityProviderClient>()
     module = await Test.createTestingModule({
@@ -177,7 +168,7 @@ describe('CognitoIdentityProviderService', () => {
         .fn()
         .mockResolvedValueOnce({ ...initiateAuthCommandOutput, ChallengeName: 'NEW_PASSWORD_REQUIRED' })
         .mockResolvedValueOnce(initiateAuthCommandOutput)
-      const result = await cognitoIdentityProviderService.createAccessToken(request)
+      const result = await cognitoIdentityProviderService.createAccessToken(payload)
       expect(result).toBeDefined()
       expect(result.accessToken).toBeDefined()
       expect(result.tokenType).toBeDefined()

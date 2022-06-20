@@ -13,6 +13,8 @@ describe('Oauth2Controller', () => {
   let sut: Oauth2Controller
   let strategyRegistry: GrantStrategyRegistry
   let request: OAuth2Request
+  let identityContext: IdentityContext
+  let userCredentials: { username: string; password: string }
   let response: OAuth2Response
   let strategy: GrantStrategyInterface
   beforeEach(async () => {
@@ -48,30 +50,65 @@ describe('Oauth2Controller', () => {
   })
   describe('token', () => {
     it('should validate request grant type', async () => {
-      request = createMock<OAuth2Request>()
-      await sut.token(request)
+      request = {
+        grantType: GrantType.CLIENT_CREDENTIALS,
+        clientId: 'client-id',
+        clientSecret: 'client-secret',
+        scopes: ['scope-1', 'scope-2'].toString()
+      }
+      identityContext = IdentityContext.AP
+      userCredentials = { username: 'username', password: 'password' }
+      const requestMerged = Object.assign(request, userCredentials, { identityContext })
+      await sut.token(identityContext, request, userCredentials)
       expect(strategyRegistry.validate).toHaveBeenCalledTimes(1)
-      expect(strategyRegistry.validate).toHaveBeenCalledWith(request)
+      expect(strategyRegistry.validate).toHaveBeenCalledWith(requestMerged)
     })
     it('should throw a error when cannot validate grant type', async () => {
+      request = {
+        grantType: GrantType.CLIENT_CREDENTIALS,
+        clientId: 'client-id',
+        clientSecret: 'client-secret',
+        scopes: ['scope-1', 'scope-2'].toString()
+      }
+      identityContext = IdentityContext.AP
+      userCredentials = { username: 'username', password: 'password' }
+      const requestMerged = Object.assign(request, userCredentials, { identityContext })
       strategyRegistry.validate = jest.fn().mockResolvedValue(undefined)
-      await expect(sut.token(request)).rejects.toThrow(new InvalidGrantTypeException(request.grantType))
+      await expect(sut.token(identityContext, request, userCredentials)).rejects.toThrow(
+        new InvalidGrantTypeException(requestMerged.grantType)
+      )
     })
     it('should throw a error if strategyRegistry throws', async () => {
+      request = {
+        grantType: GrantType.CLIENT_CREDENTIALS,
+        clientId: 'client-id',
+        clientSecret: 'client-secret',
+        scopes: ['scope-1', 'scope-2'].toString()
+      }
+      identityContext = IdentityContext.AP
+      userCredentials = { username: 'username', password: 'password' }
       strategyRegistry.validate = jest.fn().mockImplementationOnce(() => {
         throw new Error()
       })
-      await expect(sut.token(request)).rejects.toThrow(new InternalServerErrorException('We have a problem'))
+      await expect(sut.token(identityContext, request, userCredentials)).rejects.toThrow(
+        new InternalServerErrorException('We have a problem')
+      )
     })
     it('should get oauth2 response', async () => {
-      request = createMock<OAuth2Request>({
-        grantType: GrantType.PASSWORD
-      })
-      strategyRegistry['registry'] = { [GrantType.PASSWORD]: strategy }
+      request = {
+        grantType: GrantType.CLIENT_CREDENTIALS,
+        clientId: 'client-id',
+        clientSecret: 'client-secret',
+        scopes: ['scope-1', 'scope-2'].toString()
+      }
+      identityContext = IdentityContext.AP
+      userCredentials = { username: 'username', password: 'password' }
+      strategyRegistry['registry'] = { [GrantType.CLIENT_CREDENTIALS]: strategy }
+      const requestMerged = Object.assign(request, userCredentials, { identityContext })
       const strategySpy = jest.spyOn(strategyRegistry, 'getOauth2Response').mockResolvedValue(response)
-      const result = await sut.token(request)
+      const result = await sut.token(identityContext, request, userCredentials)
       expect(strategySpy).toHaveBeenCalledTimes(1)
-      expect(strategySpy).toHaveBeenCalledWith(request)
+      expect(strategySpy).toHaveBeenCalledWith(requestMerged)
       expect(result).toBeInstanceOf(OAuth2Response)
     })
   })

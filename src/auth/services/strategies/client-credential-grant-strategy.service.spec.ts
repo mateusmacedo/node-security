@@ -1,11 +1,11 @@
-import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
+import { OAuth2Response } from '@app/auth/dtos'
 import { GrantType, IdentityContext } from '@app/auth/enums'
 import {
   InvalidClientCredentialsException,
   InvalidClientScopesException,
   InvalidGrantTypeException
 } from '@app/auth/errors'
-import { IdentityProviderClientType, IdentityProviderInterface } from '@app/auth/interfaces'
+import { IdentityProviderClientType, IdentityProviderInterface, OAuth2Payload } from '@app/auth/interfaces'
 import { AbstractIdentityProviderService } from '@app/auth/services/providers/abstract'
 import { ClientCredentialGrantStrategyService } from '@app/auth/services/strategies'
 import { createMock } from '@golevelup/nestjs-testing'
@@ -15,7 +15,7 @@ import { plainToClass } from 'class-transformer'
 describe('ClientCredentialGrantStrategyService', () => {
   let clientCredentialStrategy: ClientCredentialGrantStrategyService
   let identityProviderService: AbstractIdentityProviderService<IdentityProviderClientType>
-  let request: OAuth2Request
+  let request: OAuth2Payload
   let identityProvider: IdentityProviderInterface
 
   beforeEach(async () => {

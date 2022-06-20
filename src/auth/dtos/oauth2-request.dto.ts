@@ -1,4 +1,4 @@
-import { GrantType, IdentityContext } from '@app/auth/enums'
+import { GrantType } from '@app/auth/enums'
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
 import { IsNotEmpty, IsOptional } from 'class-validator'
@@ -6,7 +6,7 @@ import { IsNotEmpty, IsOptional } from 'class-validator'
 export class OAuth2Request {
   @ApiProperty({
     enum: GrantType,
-    description: 'The type of grant you are requesting, must be "client_credentials"',
+    description: 'The type of grant you are requesting',
     required: true
   })
   @Expose({ name: 'grant_type' })
@@ -32,25 +32,8 @@ export class OAuth2Request {
   clientSecret: string
 
   @ApiProperty({
-    type: Number,
-    description:
-      'The expiration time of the assertion, specified as seconds since 00:00:00 UTC, January 1, 1970. This value has a maximum of 1 hour after the issued time.'
-  })
-  @Expose({ name: 'exp' })
-  @IsOptional()
-  exp?: number
-
-  @ApiProperty({
-    type: Number,
-    description: 'The time the assertion was issued, specified as seconds since 00:00:00 UTC, January 1, 1970.'
-  })
-  @Expose({ name: 'iat' })
-  @IsOptional()
-  iat?: number
-
-  @ApiProperty({
     type: String,
-    description: 'The list of the permissions (tpApps) that the application requests.',
+    description: 'The list of the permission that the application requests.',
     isArray: true
   })
   @Expose({ name: 'scopes' })
@@ -66,26 +49,19 @@ export class OAuth2Request {
   refreshToken?: string
 
   @ApiProperty({
-    type: String,
-    description: 'The username only when grant_type is set to "password_grant"'
+    type: Number,
+    description:
+      'The expiration time of the assertion, specified as seconds since 00:00:00 UTC, January 1, 1970. 1 hour max after the issued time.'
   })
-  @Expose({ name: 'username' })
+  @Expose({ name: 'exp' })
   @IsOptional()
-  username?: string
+  exp?: number
 
   @ApiProperty({
-    type: String,
-    description: 'The password when grant_type is set to "password_grant"'
+    type: Number,
+    description: 'The time the assertion was issued, specified as seconds since 00:00:00 UTC, January 1, 1970.'
   })
-  @Expose({ name: 'password' })
+  @Expose({ name: 'iat' })
   @IsOptional()
-  password?: string
-
-  @ApiProperty({
-    enum: IdentityContext,
-    description: 'The identity context"'
-  })
-  @Expose({ name: 'identity_context' })
-  @IsNotEmpty()
-  identityContext: IdentityContext
+  iat?: number
 }

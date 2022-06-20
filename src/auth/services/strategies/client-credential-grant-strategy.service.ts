@@ -1,11 +1,11 @@
-import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
+import { OAuth2Response } from '@app/auth/dtos'
 import { GrantType } from '@app/auth/enums'
 import {
   InvalidClientCredentialsException,
   InvalidClientScopesException,
   InvalidGrantTypeException
 } from '@app/auth/errors'
-import { IdentityProviderClientType, IdentityProviderInterface } from '@app/auth/interfaces'
+import { IdentityProviderClientType, IdentityProviderInterface, OAuth2Payload } from '@app/auth/interfaces'
 import { AbstractIdentityProviderService } from '@app/auth/services/providers/abstract'
 import { AbstractGrantStrategy, GrantStrategyDecorator } from '@app/auth/services/strategies'
 import { Injectable } from '@nestjs/common'
@@ -16,7 +16,7 @@ export class ClientCredentialGrantStrategyService extends AbstractGrantStrategy 
   constructor(private readonly identityProvider: AbstractIdentityProviderService<IdentityProviderClientType>) {
     super()
   }
-  private validateCredentials(request: OAuth2Request, client: IdentityProviderInterface): Promise<boolean> {
+  private validateCredentials(request: OAuth2Payload, client: IdentityProviderInterface): Promise<boolean> {
     if (request.clientSecret !== client.clientSecret) {
       throw new InvalidClientCredentialsException()
     }
@@ -29,7 +29,7 @@ export class ClientCredentialGrantStrategyService extends AbstractGrantStrategy 
     }
     return Promise.resolve(true)
   }
-  async validate(request: OAuth2Request): Promise<boolean> {
+  async validate(request: OAuth2Payload): Promise<boolean> {
     const { clientId, identityContext } = request
     const clientIdentified = await this.identityProvider.identifyClient({ clientId, identityContext })
     if (!clientIdentified) {
@@ -37,7 +37,7 @@ export class ClientCredentialGrantStrategyService extends AbstractGrantStrategy 
     }
     return this.validateCredentials(request, clientIdentified)
   }
-  async getOauth2Response(request: OAuth2Request): Promise<OAuth2Response> {
+  async getOauth2Response(request: OAuth2Payload): Promise<OAuth2Response> {
     return this.identityProvider.createAccessToken(request) as Promise<OAuth2Response>
   }
 }

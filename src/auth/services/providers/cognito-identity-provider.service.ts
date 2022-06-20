@@ -1,12 +1,12 @@
 import { IDENTITY_PROVIDER_METADATA } from '@app/auth/constants'
-import { OAuth2Request } from '@app/auth/dtos'
 import { GrantType, IdentityContext } from '@app/auth/enums'
 import { InvalidContextException } from '@app/auth/errors'
 import {
   IdentityProviderAccessTokenInterface,
   IdentityProviderClientInterface,
   IdentityProviderClientType,
-  IdentityProviderInterface
+  IdentityProviderInterface,
+  OAuth2Payload
 } from '@app/auth/interfaces'
 import { AbstractIdentityProviderService } from '@app/auth/services/providers/abstract'
 import {
@@ -50,14 +50,14 @@ export class CognitoIdentityProviderService extends AbstractIdentityProviderServ
     }
   }
 
-  private createSecretHash(request: OAuth2Request): string {
+  private createSecretHash(request: OAuth2Payload): string {
     return crypto
       .createHmac('sha256', request.clientSecret)
       .update(`${request.username}${request.clientId}`)
       .digest('base64')
   }
 
-  private createInitiateAuthCommandInput(request: OAuth2Request, hash: string): InitiateAuthCommandInput {
+  private createInitiateAuthCommandInput(request: OAuth2Payload, hash: string): InitiateAuthCommandInput {
     const { identityContext, clientId, username, password } = request
     this.validateIdentityContext(identityContext)
     if (request.grantType === GrantType.CLIENT_CREDENTIALS) {
@@ -84,7 +84,7 @@ export class CognitoIdentityProviderService extends AbstractIdentityProviderServ
   }
 
   private async respondToAuthChallenge(
-    request: OAuth2Request,
+    request: OAuth2Payload,
     result: InitiateAuthCommandOutput,
     hash: string
   ): Promise<RespondToAuthChallengeCommandOutput> {
@@ -103,7 +103,7 @@ export class CognitoIdentityProviderService extends AbstractIdentityProviderServ
     return this.registry[identityContext].getClient().send(command)
   }
 
-  async createAccessToken(request: OAuth2Request): Promise<IdentityProviderAccessTokenInterface> {
+  async createAccessToken(request: OAuth2Payload): Promise<IdentityProviderAccessTokenInterface> {
     this.validateIdentityContext(request.identityContext)
     const hash = this.createSecretHash(request)
     const inputInitiateAuthCommand = this.createInitiateAuthCommandInput(request, hash)

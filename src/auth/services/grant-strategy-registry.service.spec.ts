@@ -1,9 +1,9 @@
 import { GRANT_STRATEGY_METADATA } from '@app/auth/constants'
-import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
+import { OAuth2Response } from '@app/auth/dtos'
 import { GrantType, IdentityContext } from '@app/auth/enums'
 import { Oauth2StrategyNotFoundException } from '@app/auth/errors'
 import { InvalidGrantTypeException } from '@app/auth/errors/invalid-grant-type.exception'
-import { GrantStrategyInterface } from '@app/auth/interfaces'
+import { GrantStrategyInterface, OAuth2Payload } from '@app/auth/interfaces'
 import { GrantStrategyRegistry } from '@app/auth/services'
 import { GrantStrategyDecorator } from '@app/auth/services/strategies'
 import { StrategyExplorerService } from '@app/common/services'
@@ -15,10 +15,10 @@ import { plainToClass } from 'class-transformer'
 @Injectable()
 @GrantStrategyDecorator(GrantType.CLIENT_CREDENTIALS)
 class GrantStrategyStub implements GrantStrategyInterface {
-  async validate(request: OAuth2Request): Promise<boolean> {
+  async validate(request: OAuth2Payload): Promise<boolean> {
     return request.grantType === GrantType.CLIENT_CREDENTIALS
   }
-  async getOauth2Response(request: OAuth2Request): Promise<OAuth2Response> {
+  async getOauth2Response(request: OAuth2Payload): Promise<OAuth2Response> {
     return request.grantType === GrantType.CLIENT_CREDENTIALS
       ? plainToClass(OAuth2Response, {
           access_token: 'access-token',
@@ -80,38 +80,38 @@ describe('GrantStrategyRegistryService', () => {
   })
   describe('validate', () => {
     it('should throw a error when not have a registered strategy', async () => {
-      const request = createMock<OAuth2Request>({
+      const payload = createMock<OAuth2Payload>({
         grantType: GrantType.PASSWORD
       })
-      await expect(service.validate(request)).rejects.toThrow(Oauth2StrategyNotFoundException)
+      await expect(service.validate(payload)).rejects.toThrow(Oauth2StrategyNotFoundException)
     })
     it('should validate when has a strategy registered', async () => {
       const strategySpy = jest.spyOn(GrantStrategyStub.prototype, 'validate')
-      const request = createMock<OAuth2Request>({
+      const payload = createMock<OAuth2Payload>({
         grantType: GrantType.CLIENT_CREDENTIALS
       })
-      const result = await service.validate(request)
+      const result = await service.validate(payload)
       expect(result).toBeTruthy()
       expect(strategySpy).toHaveBeenCalledTimes(1)
-      expect(strategySpy).toHaveBeenCalledWith(request)
+      expect(strategySpy).toHaveBeenCalledWith(payload)
     })
   })
   describe('getOauth2Response', () => {
     it('should throw a error when no have strategies registered for grant type', async () => {
-      const request = createMock<OAuth2Request>({
+      const payload = createMock<OAuth2Payload>({
         grantType: GrantType.PASSWORD
       })
-      await expect(service.getOauth2Response(request)).rejects.toThrow(Oauth2StrategyNotFoundException)
+      await expect(service.getOauth2Response(payload)).rejects.toThrow(Oauth2StrategyNotFoundException)
     })
     it('should return a response when success', async () => {
       const strategySpy = jest.spyOn(service['registry'][GrantType.CLIENT_CREDENTIALS], 'getOauth2Response')
-      const request = createMock<OAuth2Request>({
+      const payload = createMock<OAuth2Payload>({
         grantType: GrantType.CLIENT_CREDENTIALS
       })
-      const result = await service.getOauth2Response(request)
+      const result = await service.getOauth2Response(payload)
       expect(result).toBeInstanceOf(OAuth2Response)
       expect(strategySpy).toHaveBeenCalledTimes(1)
-      expect(strategySpy).toHaveBeenCalledWith(request)
+      expect(strategySpy).toHaveBeenCalledWith(payload)
     })
   })
 })

@@ -1,7 +1,7 @@
 import { GRANT_STRATEGY_METADATA } from '@app/auth/constants'
-import { OAuth2Request, OAuth2Response } from '@app/auth/dtos'
+import { OAuth2Response } from '@app/auth/dtos'
 import { Oauth2StrategyNotFoundException } from '@app/auth/errors'
-import { GrantStrategyInterface, StrategyRegistryInterface } from '@app/auth/interfaces'
+import { GrantStrategyInterface, OAuth2Payload, StrategyRegistryInterface } from '@app/auth/interfaces'
 import { Injectable, Type } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
 
@@ -27,20 +27,20 @@ export class GrantStrategyRegistry
       this.registry[strategyName] = instance
     })
   }
-  private validateGrantType(request: OAuth2Request): boolean {
+  private validateGrantType(request: OAuth2Payload): boolean {
     if (!(request.grantType in this.registry)) {
       throw new Oauth2StrategyNotFoundException(request.grantType)
     }
     return true
   }
 
-  async validate(request: OAuth2Request): Promise<boolean> {
+  async validate(request: OAuth2Payload): Promise<boolean> {
     if (this.validateGrantType(request)) {
       return this.registry[request.grantType].validate(request)
     }
   }
 
-  async getOauth2Response(request: OAuth2Request): Promise<OAuth2Response> {
+  async getOauth2Response(request: OAuth2Payload): Promise<OAuth2Response> {
     if (this.validateGrantType(request)) {
       return this.registry[request.grantType].getOauth2Response(request)
     }
