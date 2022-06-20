@@ -13,4 +13,4 @@ EXPOSE $LISTEN_PORT
 
 ENV NODE_ENV=development
 
-CMD [ "yarn", "start:debug" ]
+CMD [ "yarn", "start:dev" ]

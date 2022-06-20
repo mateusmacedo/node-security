@@ -40,7 +40,7 @@ services:
     ports:
       - "9090:9090"
     depends_on:
-      - nestjs-startkit
+      - node-security
 
   grafana:
     image: grafana/grafana:8.1.0-ubuntu
@@ -77,15 +77,15 @@ services:
       mode: global
     volumes:
       - ./etc/fluent.conf:/fluentd/etc/fluent.conf
-      # - /etc/machine-id:/etc/machine-id
-      # - /dev/log:/dev/log
-      # - /var/run/systemd/journal/:/var/run/systemd/journal/
-  nestjs-startkit:
-    image: nestjs-startkit:latest
+      - /etc/machine-id:/etc/machine-id
+      - /dev/log:/dev/log
+      - /var/run/systemd/journal/:/var/run/systemd/journal/
+  node-security:
+    image: node-security:dev
     # build:
     #   context: .
     #   dockerfile: Dockerfile.dev
-    container_name: nestjs-startkit
+    container_name: node-security
     expose:
       - 3000
       - 9229
@@ -98,7 +98,7 @@ services:
       - ./src:/usr/src/app/src
       - ./.env:/usr/src/app/.env
     environment:
-      OTEL_SERVICE_NAME: nestjs-startkit
+      OTEL_SERVICE_NAME: node-security
       OTEL_EXPORTER_JAEGER_ENDPOINT: http://tempo:14268/api/traces 
     logging:
       driver: "fluentd"
