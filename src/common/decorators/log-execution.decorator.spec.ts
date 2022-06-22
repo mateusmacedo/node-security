@@ -1,10 +1,14 @@
 import { LogExecution } from '@app/common/decorators'
 import { createMock } from '@golevelup/nestjs-testing'
-import { ConfigModule, ConfigService } from '@nestjs/config'
+import { ConfigModule } from '@nestjs/config'
 import { Test } from '@nestjs/testing'
 import { LoggerModule, PinoLogger } from 'nestjs-pino'
 
+process.env.NODE_ENV = 'logExecution'
 describe('LogExecutionDecorator', () => {
+  afterAll(() => {
+    process.env.NODE_ENV = 'test'
+  })
   class DummyClass {
     @LogExecution()
     async asyncDummyMethod(data: string) {
@@ -17,14 +21,6 @@ describe('LogExecutionDecorator', () => {
     }
   }
   let sut: DummyClass
-  const mockConfigService = createMock<ConfigService>({
-    get: jest.fn((key: string) => {
-      if (key === 'NODE_ENV') {
-        return 'test'
-      }
-      return 'development'
-    })
-  })
   const mockLogger = createMock<PinoLogger>({
     info: jest.fn().mockReturnValue(undefined)
   })
@@ -42,8 +38,6 @@ describe('LogExecutionDecorator', () => {
     })
       .overrideProvider(PinoLogger)
       .useValue(mockLogger)
-      .overrideProvider(ConfigService)
-      .useValue(mockConfigService)
       .compile()
     sut = moduleRef.get<DummyClass>('DummyClass')
   })
