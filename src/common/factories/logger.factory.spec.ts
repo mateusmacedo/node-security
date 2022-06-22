@@ -1,12 +1,18 @@
 import { loggerFactory } from '@app/common/factories/logger.factory'
 import { createMock } from '@golevelup/nestjs-testing'
+import { TraceService } from '@metinseylan/nestjs-opentelemetry'
 import { ConfigService } from '@nestjs/config'
-import { Context, context, Span, trace } from '@opentelemetry/api'
+import { Span } from '@opentelemetry/sdk-trace-base'
 import { IncomingMessage } from 'http'
 
+process.env.NODE_ENV = 'logExecution'
 describe('LoggerFactory', () => {
   let configService: ConfigService
+  let traceService: TraceService
   let object: Record<string, string>
+  afterAll(() => {
+    process.env.NODE_ENV = 'test'
+  })
   beforeEach(async () => {
     jest.clearAllMocks()
     configService = createMock<ConfigService>({
@@ -20,25 +26,27 @@ describe('LoggerFactory', () => {
         .mockReturnValueOnce(true)
         .mockReturnValueOnce(128)
     })
+    traceService = createMock<TraceService>({
+      getSpan: jest.fn().mockReturnValue(
+        createMock<Span>({
+          spanContext: jest.fn().mockReturnValue({
+            spanId: 'spanId',
+            traceId: 'traceId'
+          })
+        })
+      )
+    })
     object = {
       dummy: 'dummy'
     }
   })
 
-  it('should be defined', () => {
-    expect(loggerFactory).toBeDefined()
+  it('should be defined', async () => {
+    expect(await loggerFactory(configService, traceService)).toBeDefined()
   })
   describe('execution', () => {
     it('should log with spanId and traceId', async () => {
-      const contextSpy = jest.spyOn(context, 'active').mockReturnValue(createMock<Context>())
-      const spanMock = createMock<Span>({
-        spanContext: () => ({
-          spanId: 'spanId',
-          traceId: 'traceId'
-        })
-      })
-      const traceSpy = jest.spyOn(trace, 'getSpan').mockReturnValue(spanMock)
-      const result = await loggerFactory(configService)
+      const result = await loggerFactory(configService, traceService)
       const logSpy = jest.spyOn(result.pinoHttp.logger, 'info')
       const incomingMessage = createMock<IncomingMessage>({
         headers: {
@@ -50,13 +58,10 @@ describe('LoggerFactory', () => {
       expect(result).toBeDefined()
       expect(genReqId).toBe('123')
       expect(logSpy).toHaveBeenCalledWith(object)
-      expect(contextSpy).toHaveBeenCalledTimes(1)
-      expect(traceSpy).toHaveBeenCalledTimes(1)
-      expect(spanMock.spanContext).toHaveBeenCalledTimes(1)
     })
     it('should log without spanId and traceId', async () => {
-      const traceSpy = jest.spyOn(trace, 'getSpan').mockReturnValue(undefined)
-      const result = await loggerFactory(configService)
+      traceService.getSpan = jest.fn().mockReturnValue(undefined)
+      const result = await loggerFactory(configService, traceService)
       const logSpy = jest.spyOn(result.pinoHttp.logger, 'info')
       const incomingMessage = createMock<IncomingMessage>({
         headers: {
@@ -68,7 +73,6 @@ describe('LoggerFactory', () => {
       expect(result).toBeDefined()
       expect(genReqId).toBe('123')
       expect(logSpy).toHaveBeenCalledWith(object)
-      expect(traceSpy).toHaveBeenCalledTimes(1)
     })
   })
 })
