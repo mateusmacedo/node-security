@@ -16,18 +16,28 @@ import {
   PipeInjector,
   ProcessStartTimeMetric,
   ResourceMetric,
-  ScheduleInjector
+  ScheduleInjector,
+  TraceService
 } from '@metinseylan/nestjs-opentelemetry'
 import { HttpModule } from '@nestjs/axios'
 import { DynamicModule, Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { TerminusModule } from '@nestjs/terminus'
 import { ThrottlerModule, ThrottlerModuleOptions } from '@nestjs/throttler'
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node'
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks'
 import { CompositePropagator, W3CBaggagePropagator, W3CTraceContextPropagator } from '@opentelemetry/core'
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger'
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus'
+import { AwsInstrumentation } from '@opentelemetry/instrumentation-aws-sdk'
+import { ConnectInstrumentation } from '@opentelemetry/instrumentation-connect'
+import { DnsInstrumentation } from '@opentelemetry/instrumentation-dns'
+import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express'
+import { GenericPoolInstrumentation } from '@opentelemetry/instrumentation-generic-pool'
+import { HttpInstrumentation } from '@opentelemetry/instrumentation-http'
+import { IORedisInstrumentation } from '@opentelemetry/instrumentation-ioredis'
+import { NestInstrumentation } from '@opentelemetry/instrumentation-nestjs-core'
+import { NetInstrumentation } from '@opentelemetry/instrumentation-net'
+import { PinoInstrumentation } from '@opentelemetry/instrumentation-pino'
 import { B3InjectEncoding, B3Propagator } from '@opentelemetry/propagator-b3'
 import { JaegerPropagator } from '@opentelemetry/propagator-jaeger'
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
@@ -64,10 +74,6 @@ export class CommonModule {
             }
           }
         }),
-        LoggerModule.forRootAsync({
-          inject: [ConfigService],
-          useFactory: loggerFactory
-        }),
         OpenTelemetryModule.forRoot({
           applicationName: 'node-security',
           traceAutoInjectors: [
@@ -103,7 +109,22 @@ export class CommonModule {
               })
             ]
           }),
-          instrumentations: [getNodeAutoInstrumentations()]
+          instrumentations: [
+            new AwsInstrumentation(),
+            new ConnectInstrumentation(),
+            new DnsInstrumentation(),
+            new ExpressInstrumentation(),
+            new GenericPoolInstrumentation(),
+            new HttpInstrumentation(),
+            new IORedisInstrumentation(),
+            new NestInstrumentation(),
+            new NetInstrumentation(),
+            new PinoInstrumentation()
+          ]
+        }),
+        LoggerModule.forRootAsync({
+          inject: [ConfigService, TraceService],
+          useFactory: loggerFactory
         })
       ],
       providers: [StrategyExplorerService, CorrelationIdMiddleware, HealthService, AppConfigService],
