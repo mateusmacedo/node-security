@@ -20,7 +20,7 @@ RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
 RUN rm -rf node_modules
-RUN npm install --only=production
+RUN npm install --omit=dev
 
 FROM base as runner
 

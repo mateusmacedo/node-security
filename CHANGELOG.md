@@ -1,10 +1,14 @@
 > Refactoring
 
-* refactor(deploy): optimize image build ([`846f411`](https://ssh.dev.azure.com/git@ssh.dev.azure.com:v3/QsaudeDevOps/DigitalWorkPlace/node-security/commit/846f411f7ec41553e9ee3701b027c247d6197fae))
+* refactor(deploy): optimize image build ([`f5f7efb`](https://ssh.dev.azure.com/git@ssh.dev.azure.com:v3/QsaudeDevOps/DigitalWorkPlace/node-security/commit/f5f7efb9ee042ba925edc930d152a7c1fe029114))
 
 # v0.2.0
 
 ## 2022-07-05
+
+# v0.1.1
+
+## 2022-07-14
 
 > Features
 
