@@ -8,15 +8,25 @@ export function LogExecution() {
       pinoInjector(target, 'logger')
       const originalMethod = propertyDescriptor.value
       propertyDescriptor.value = function (...data: any[]) {
-        const result = originalMethod.apply(this, data)
-        if (result instanceof Promise) {
-          return result.then((res) => {
-            this.logger.info({ data, result: res })
-            return res
-          })
-        } else {
-          this.logger.info({ data, result })
-          return result
+        try {
+          const result = originalMethod.apply(this, data)
+          if (result instanceof Promise) {
+            return result
+              .then((res) => {
+                this.logger.info({ data, result: res })
+                return res
+              })
+              .catch((err) => {
+                this.logger.error({ data, error: err })
+                throw err
+              })
+          } else {
+            this.logger.info({ data, result })
+            return result
+          }
+        } catch (err) {
+          this.logger.error(err)
+          throw err
         }
       }
     }
