@@ -1,3 +1,4 @@
+import { AuthModule } from '@app/auth/auth.module'
 import { CommonModule } from '@app/common/common.module'
 import { Module } from '@nestjs/common'
 
@@ -5,13 +6,14 @@ import { Module } from '@nestjs/common'
   imports: [
     CommonModule.register({
       configModule: {
-        ignoreEnvFile: JSON.parse(process.env.IGNORE_ENV_FILE),
+        ignoreEnvFile: process.env.NODE_ENV === 'production',
         envFilePath: process.env.ENV_FILE_PATH,
-        expandVariables: JSON.parse(process.env.EXPAND_VARIABLES),
-        cache: JSON.parse(process.env.CACHE),
-        isGlobal: JSON.parse(process.env.IS_GLOBAL)
+        expandVariables: process.env.NODE_ENV !== 'production',
+        cache: process.env.NODE_ENV === 'production',
+        isGlobal: true
       }
-    })
+    }),
+    AuthModule
   ],
   controllers: [],
   providers: []

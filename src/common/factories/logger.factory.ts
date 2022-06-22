@@ -1,9 +1,9 @@
+import { TraceService } from '@metinseylan/nestjs-opentelemetry'
 import { ConfigService } from '@nestjs/config'
-import { context, trace } from '@opentelemetry/api'
 import { IncomingMessage } from 'http'
 import pino from 'pino'
 
-export const loggerFactory = async (configService: ConfigService) => {
+export const loggerFactory = async (configService: ConfigService, traceService: TraceService) => {
   const loggerOptions: pino.LoggerOptions = {
     level: 'info',
     formatters: {
@@ -11,8 +11,7 @@ export const loggerFactory = async (configService: ConfigService) => {
         return { level: label }
       },
       log(object) {
-        const contextRef = context.active()
-        const span = trace.getSpan(contextRef)
+        const span = traceService.getSpan()
         if (!span) return { ...object }
         const { spanId, traceId } = span.spanContext()
         return { object, spanId, traceId }

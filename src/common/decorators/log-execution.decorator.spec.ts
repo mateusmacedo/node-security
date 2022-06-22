@@ -1,20 +1,26 @@
 import { LogExecution } from '@app/common/decorators'
 import { createMock } from '@golevelup/nestjs-testing'
-import { ConfigModule, ConfigService } from '@nestjs/config'
+import { ConfigModule } from '@nestjs/config'
 import { Test } from '@nestjs/testing'
 import { LoggerModule, PinoLogger } from 'nestjs-pino'
 
+process.env.NODE_ENV = 'logExecution'
 describe('LogExecutionDecorator', () => {
+  afterAll(() => {
+    process.env.NODE_ENV = 'test'
+  })
   class DummyClass {
     @LogExecution()
-    async dummyMethod(data: string) {
+    async asyncDummyMethod(data: string) {
+      return data
+    }
+
+    @LogExecution()
+    dummyMethod(data: string) {
       return data
     }
   }
   let sut: DummyClass
-  const mockConfigService = createMock<ConfigService>({
-    get: jest.fn(() => 'runMock')
-  })
   const mockLogger = createMock<PinoLogger>({
     info: jest.fn().mockReturnValue(undefined)
   })
@@ -32,8 +38,6 @@ describe('LogExecutionDecorator', () => {
     })
       .overrideProvider(PinoLogger)
       .useValue(mockLogger)
-      .overrideProvider(ConfigService)
-      .useValue(mockConfigService)
       .compile()
     sut = moduleRef.get<DummyClass>('DummyClass')
   })
@@ -42,9 +46,17 @@ describe('LogExecutionDecorator', () => {
     expect(sut).toBeDefined()
   })
   describe('LogExecution', () => {
-    it('should process logging flow correctly', async () => {
+    it('should process logging flow correctly when async', async () => {
+      const spy = jest.spyOn(sut, 'asyncDummyMethod')
+      expect(await sut.asyncDummyMethod('dummy')).toBe('dummy')
+      expect(spy).toHaveBeenCalledTimes(1)
+      expect(spy).toHaveBeenCalledWith('dummy')
+      expect(mockLogger.info).toHaveBeenCalledTimes(1)
+      expect(mockLogger.info).toBeCalledWith({ data: ['dummy'], result: 'dummy' })
+    })
+    it('should process logging flow correctly', () => {
       const spy = jest.spyOn(sut, 'dummyMethod')
-      expect(await sut.dummyMethod('dummy')).toBe('dummy')
+      expect(sut.dummyMethod('dummy')).toBe('dummy')
       expect(spy).toHaveBeenCalledTimes(1)
       expect(spy).toHaveBeenCalledWith('dummy')
       expect(mockLogger.info).toHaveBeenCalledTimes(1)

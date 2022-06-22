@@ -15,7 +15,7 @@ scrape_configs:
     static_configs:
     - targets: ['loki:3100']
 
-  - job_name: 'nestjs-startkit'
+  - job_name: 'node-security'
     metrics_path: /metrics
     static_configs:
-    - targets: ['nestjs-startkit:8081']
+    - targets: ['node-security:8081']

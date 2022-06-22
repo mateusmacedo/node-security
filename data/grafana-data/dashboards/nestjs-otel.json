@@ -89,7 +89,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "(\n  sum(rate(http_request_duration_seconds_bucket{le=\"0.025\",status=~\"^2..$\", job=\"nestjs-startkit\"}[1m]))\n+\n  sum(rate(http_request_duration_seconds_bucket{le=\"0.1\",status=~\"^2..$\", job=\"nestjs-startkit\"}[1m]))\n) / 2 / sum(rate(http_request_duration_seconds_count{job=\"nestjs-startkit\"}[1m]))",
+          "expr": "(\n  sum(rate(http_request_duration_seconds_bucket{le=\"0.025\",status=~\"^2..$\", job=\"node-security\"}[1m]))\n+\n  sum(rate(http_request_duration_seconds_bucket{le=\"0.1\",status=~\"^2..$\", job=\"node-security\"}[1m]))\n) / 2 / sum(rate(http_request_duration_seconds_count{job=\"node-security\"}[1m]))",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -176,7 +176,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "(\n  sum(irate(http_request_duration_seconds_bucket{le=\"0.025\",status=~\"^2..$\", job=\"nestjs-startkit\"}[1m]))\n+\n  (sum(irate(http_request_duration_seconds_bucket{le=\"0.1\",status=~\"^2..$\", job=\"nestjs-startkit\"}[1m]))/2)\n) / sum(irate(http_request_duration_seconds_count{job=\"nestjs-startkit\"}[1m]))",
+          "expr": "(\n  sum(irate(http_request_duration_seconds_bucket{le=\"0.025\",status=~\"^2..$\", job=\"node-security\"}[1m]))\n+\n  (sum(irate(http_request_duration_seconds_bucket{le=\"0.1\",status=~\"^2..$\", job=\"node-security\"}[1m]))/2)\n) / sum(irate(http_request_duration_seconds_count{job=\"node-security\"}[1m]))",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -254,7 +254,7 @@
       "pluginVersion": "8.1.0",
       "targets": [
         {
-          "expr": "sum(nodejs_active_requests_total{job=\"nestjs-startkit\"})",
+          "expr": "sum(nodejs_active_requests_total{job=\"node-security\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -360,7 +360,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "process_resident_memory_bytes{job=\"nestjs-startkit\"}",
+          "expr": "process_resident_memory_bytes{job=\"node-security\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -368,7 +368,7 @@
           "refId": "A"
         },
         {
-          "expr": "nodejs_heap_size_total_bytes{job=\"nestjs-startkit\"}",
+          "expr": "nodejs_heap_size_total_bytes{job=\"node-security\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -376,7 +376,7 @@
           "refId": "B"
         },
         {
-          "expr": "nodejs_heap_size_used_bytes{job=\"nestjs-startkit\"}",
+          "expr": "nodejs_heap_size_used_bytes{job=\"node-security\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -384,7 +384,7 @@
           "refId": "C"
         },
         {
-          "expr": "nodejs_external_memory_bytes{job=\"nestjs-startkit\"}",
+          "expr": "nodejs_external_memory_bytes{job=\"node-security\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -477,7 +477,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "irate(process_cpu_user_seconds_total{job=\"nestjs-startkit\"}[2m]) * 100",
+          "expr": "irate(process_cpu_user_seconds_total{job=\"node-security\"}[2m]) * 100",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -486,7 +486,7 @@
         },
         {
           "exemplar": true,
-          "expr": "irate(process_cpu_system_seconds_total{job=\"nestjs-startkit\"}[2m]) * 100",
+          "expr": "irate(process_cpu_system_seconds_total{job=\"node-security\"}[2m]) * 100",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -579,7 +579,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "nodejs_eventloop_lag_seconds{job=\"nestjs-startkit\"}",
+          "expr": "nodejs_eventloop_lag_seconds{job=\"node-security\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -672,7 +672,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "nodejs_active_handles_total{job=\"nestjs-startkit\"}",
+          "expr": "nodejs_active_handles_total{job=\"node-security\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -681,7 +681,7 @@
         },
         {
           "exemplar": true,
-          "expr": "nodejs_active_requests_total{job=\"nestjs-startkit\"}",
+          "expr": "nodejs_active_requests_total{job=\"node-security\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -774,7 +774,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "nodejs_heap_space_size_total_bytes{job=\"nestjs-startkit\"}",
+          "expr": "nodejs_heap_space_size_total_bytes{job=\"node-security\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -867,7 +867,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "nodejs_heap_space_size_available_bytes{job=\"nestjs-startkit\"}",
+          "expr": "nodejs_heap_space_size_available_bytes{job=\"node-security\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -959,7 +959,7 @@
       "pluginVersion": "8.1.0",
       "targets": [
         {
-          "expr": "nodejs_heap_space_size_used_bytes{job=\"nestjs-startkit\"}",
+          "expr": "nodejs_heap_space_size_used_bytes{job=\"node-security\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1043,7 +1043,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "histogram_quantile(0.90, sum(rate(http_request_duration_seconds_bucket{job=\"nestjs-startkit\"}[1m])) by (le,method,path)) * 1000",
+          "expr": "histogram_quantile(0.90, sum(rate(http_request_duration_seconds_bucket{job=\"node-security\"}[1m])) by (le,method,path)) * 1000",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1150,7 +1150,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket{job=\"nestjs-startkit\"}[1m])) by (le,method,path)) * 1000",
+          "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket{job=\"node-security\"}[1m])) by (le,method,path)) * 1000",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1249,7 +1249,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum by (status,method) (increase(http_request_duration_seconds_count{job=\"nestjs-startkit\"}[$__rate_interval]))",
+          "expr": "sum by (status,method) (increase(http_request_duration_seconds_count{job=\"node-security\"}[$__rate_interval]))",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1348,7 +1348,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum by (path) (increase(http_request_duration_seconds_count{job=\"nestjs-startkit\"}[$__rate_interval]))",
+          "expr": "sum by (path) (increase(http_request_duration_seconds_count{job=\"node-security\"}[$__rate_interval]))",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1461,7 +1461,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(http_request_duration_seconds_count{job=\"nestjs-startkit\"}[1m])) by (status)",
+          "expr": "sum(rate(http_request_duration_seconds_count{job=\"node-security\"}[1m])) by (status)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1566,7 +1566,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(rate(http_request_duration_seconds_sum{job=\"nestjs-startkit\"}[1m])) * 10\n/\nsum(rate(http_request_duration_seconds_count{job=\"nestjs-startkit\"}[1m])) ",
+          "expr": "sum(rate(http_request_duration_seconds_sum{job=\"node-security\"}[1m])) * 10\n/\nsum(rate(http_request_duration_seconds_count{job=\"node-security\"}[1m])) ",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1663,7 +1663,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(rate(http_request_duration_seconds_count{status=~\"[45]..\", job=\"nestjs-startkit\"}[1m])) by (job) / sum(rate(http_request_duration_seconds_count{job=\"nestjs-startkit\"}[1m])) by (job)",
+          "expr": "sum(rate(http_request_duration_seconds_count{status=~\"[45]..\", job=\"node-security\"}[1m])) by (job) / sum(rate(http_request_duration_seconds_count{job=\"node-security\"}[1m])) by (job)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1759,7 +1759,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(rate(http_request_duration_seconds_count{job=\"nestjs-startkit\"}[1m])) by (job)",
+          "expr": "sum(rate(http_request_duration_seconds_count{job=\"node-security\"}[1m])) by (job)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1767,7 +1767,7 @@
           "refId": "A"
         },
         {
-          "expr": "sum(rate(http_request_duration_seconds_count{status=\"500\", job=\"nestjs-startkit\"}[1m])) by (job)",
+          "expr": "sum(rate(http_request_duration_seconds_count{status=\"500\", job=\"node-security\"}[1m])) by (job)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
