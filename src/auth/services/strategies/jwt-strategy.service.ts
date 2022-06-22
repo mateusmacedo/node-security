@@ -22,7 +22,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     })
   }
 
-  @Span()
+  @Span('validate')
   @Counter()
   @LogExecution()
   public async validate(payload: JwtTokenInterface) {

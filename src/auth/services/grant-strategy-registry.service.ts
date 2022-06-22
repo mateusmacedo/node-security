@@ -30,7 +30,7 @@ export class GrantStrategyRegistry
     })
   }
 
-  @Span()
+  @Span('validateGrantType')
   @Counter()
   @LogExecution()
   private validateGrantType(request: OAuth2Payload): boolean {
@@ -40,7 +40,7 @@ export class GrantStrategyRegistry
     return true
   }
 
-  @Span()
+  @Span('validate')
   @Counter()
   @LogExecution()
   async validate(request: OAuth2Payload): Promise<boolean> {
@@ -49,7 +49,7 @@ export class GrantStrategyRegistry
     }
   }
 
-  @Span()
+  @Span('getOauth2Response')
   @Counter()
   @LogExecution()
   async getOauth2Response(request: OAuth2Payload): Promise<OAuth2Response> {

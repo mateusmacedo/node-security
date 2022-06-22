@@ -3,6 +3,7 @@ import { IdentityContext } from '@app/auth/enums'
 import { InvalidGrantTypeException } from '@app/auth/errors'
 import { GrantStrategyRegistry } from '@app/auth/services'
 import { LogExecution } from '@app/common/decorators'
+import { Counter, Span } from '@metinseylan/nestjs-opentelemetry'
 import {
   BadRequestException,
   Body,
@@ -18,6 +19,8 @@ export class Oauth2Controller {
   constructor(private readonly strategyRegistry: GrantStrategyRegistry) {}
 
   @Post('token')
+  @Span('token')
+  @Counter()
   @LogExecution()
   async token(
     @Headers('x-identity-context') identityContext: IdentityContext,

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { InjectPinoLogger } from 'nestjs-pino'
 
 export function LogExecution() {

@@ -82,6 +82,7 @@ describe('ClientCredentialGrantStrategyService', () => {
       await expect(clientCredentialStrategy.validate(invalidRequest)).rejects.toThrow(
         new InvalidClientCredentialsException()
       )
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       invalidRequest = { ...request, grantType: 'invalid-grant-type' as any }
       await expect(clientCredentialStrategy.validate(invalidRequest)).rejects.toThrow(
         new InvalidGrantTypeException(invalidRequest.grantType)

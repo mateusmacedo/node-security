@@ -33,7 +33,7 @@ export class CognitoIdentityProviderService extends AbstractIdentityProviderServ
     super()
   }
 
-  @Span()
+  @Span('respondToAuthChallenge')
   @Counter()
   @LogExecution()
   private async respondToAuthChallenge(
@@ -56,7 +56,7 @@ export class CognitoIdentityProviderService extends AbstractIdentityProviderServ
     return this.registry[identityContext].getClient().send(command)
   }
 
-  @Span()
+  @Span('createInitiateAuthCommandInput')
   @Counter()
   @LogExecution()
   private createInitiateAuthCommandInput(request: OAuth2Payload, hash: string): InitiateAuthCommandInput {
@@ -85,7 +85,7 @@ export class CognitoIdentityProviderService extends AbstractIdentityProviderServ
     }
   }
 
-  @Span()
+  @Span('createSecretHash')
   @Counter()
   @LogExecution()
   private createSecretHash(request: OAuth2Payload): string {
@@ -95,7 +95,7 @@ export class CognitoIdentityProviderService extends AbstractIdentityProviderServ
       .digest('base64')
   }
 
-  @Span()
+  @Span('validateIdentityContext')
   @Counter()
   @LogExecution()
   private validateIdentityContext(identityContext: IdentityContext): void {
@@ -104,7 +104,7 @@ export class CognitoIdentityProviderService extends AbstractIdentityProviderServ
     }
   }
 
-  @Span()
+  @Span('createAccessToken')
   @Counter()
   @LogExecution()
   async createAccessToken(request: OAuth2Payload): Promise<IdentityProviderAccessTokenInterface> {
@@ -126,7 +126,7 @@ export class CognitoIdentityProviderService extends AbstractIdentityProviderServ
     }
   }
 
-  @Span()
+  @Span('identifyClient')
   @Counter()
   @LogExecution()
   async identifyClient(data: Partial<IdentityProviderInterface>): Promise<IdentityProviderInterface> {
@@ -147,7 +147,7 @@ export class CognitoIdentityProviderService extends AbstractIdentityProviderServ
     } as IdentityProviderInterface
   }
 
-  @Span()
+  @Span('register')
   @Counter()
   @LogExecution()
   register(strategies: IdentityProviderClientType[]): void {

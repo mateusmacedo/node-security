@@ -19,7 +19,7 @@ export class ClientCredentialGrantStrategyService extends AbstractGrantStrategy 
     super()
   }
 
-  @Span()
+  @Span('validateCredentials')
   @Counter()
   @LogExecution()
   private validateCredentials(request: OAuth2Payload, client: IdentityProviderInterface): Promise<boolean> {
@@ -36,7 +36,7 @@ export class ClientCredentialGrantStrategyService extends AbstractGrantStrategy 
     return Promise.resolve(true)
   }
 
-  @Span()
+  @Span('validate')
   @Counter()
   @LogExecution()
   async validate(request: OAuth2Payload): Promise<boolean> {
@@ -48,7 +48,7 @@ export class ClientCredentialGrantStrategyService extends AbstractGrantStrategy 
     return this.validateCredentials(request, clientIdentified)
   }
 
-  @Span()
+  @Span('getOauth2Response')
   @Counter()
   @LogExecution()
   async getOauth2Response(request: OAuth2Payload): Promise<OAuth2Response> {
