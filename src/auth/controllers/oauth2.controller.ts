@@ -2,6 +2,7 @@ import { OAuth2Request, OAuth2Response, UserCredentialsDto } from '@app/auth/dto
 import { IdentityContext } from '@app/auth/enums'
 import { InvalidGrantTypeException } from '@app/auth/errors'
 import { GrantStrategyRegistry } from '@app/auth/services'
+import { LogExecution } from '@app/common/decorators'
 import {
   BadRequestException,
   Body,
@@ -17,6 +18,7 @@ export class Oauth2Controller {
   constructor(private readonly strategyRegistry: GrantStrategyRegistry) {}
 
   @Post('token')
+  @LogExecution()
   async token(
     @Headers('x-identity-context') identityContext: IdentityContext,
     @Query() request: OAuth2Request,

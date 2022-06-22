@@ -1,4 +1,6 @@
 import { JwtTokenInterface } from '@app/auth/interfaces'
+import { LogExecution } from '@app/common/decorators'
+import { Counter, Span } from '@metinseylan/nestjs-opentelemetry'
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { PassportStrategy } from '@nestjs/passport'
@@ -20,6 +22,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     })
   }
 
+  @Span()
+  @Counter()
+  @LogExecution()
   public async validate(payload: JwtTokenInterface) {
     return payload !== undefined
   }

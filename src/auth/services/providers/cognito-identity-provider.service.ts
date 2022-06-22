@@ -9,6 +9,7 @@ import {
   OAuth2Payload
 } from '@app/auth/interfaces'
 import { AbstractIdentityProviderService } from '@app/auth/services/providers/abstract'
+import { LogExecution } from '@app/common/decorators'
 import {
   DescribeUserPoolClientCommand,
   DescribeUserPoolClientCommandInput,
@@ -19,6 +20,7 @@ import {
   RespondToAuthChallengeCommandInput,
   RespondToAuthChallengeCommandOutput
 } from '@aws-sdk/client-cognito-identity-provider'
+import { Counter, Span } from '@metinseylan/nestjs-opentelemetry'
 import { Injectable } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
 import crypto from 'crypto'
@@ -31,6 +33,9 @@ export class CognitoIdentityProviderService extends AbstractIdentityProviderServ
     super()
   }
 
+  @Span()
+  @Counter()
+  @LogExecution()
   private async respondToAuthChallenge(
     request: OAuth2Payload,
     result: InitiateAuthCommandOutput,
@@ -51,6 +56,9 @@ export class CognitoIdentityProviderService extends AbstractIdentityProviderServ
     return this.registry[identityContext].getClient().send(command)
   }
 
+  @Span()
+  @Counter()
+  @LogExecution()
   private createInitiateAuthCommandInput(request: OAuth2Payload, hash: string): InitiateAuthCommandInput {
     const { identityContext, clientId, username, password } = request
     this.validateIdentityContext(identityContext)
@@ -77,6 +85,9 @@ export class CognitoIdentityProviderService extends AbstractIdentityProviderServ
     }
   }
 
+  @Span()
+  @Counter()
+  @LogExecution()
   private createSecretHash(request: OAuth2Payload): string {
     return crypto
       .createHmac('sha256', request.clientSecret)
@@ -84,12 +95,18 @@ export class CognitoIdentityProviderService extends AbstractIdentityProviderServ
       .digest('base64')
   }
 
+  @Span()
+  @Counter()
+  @LogExecution()
   private validateIdentityContext(identityContext: IdentityContext): void {
     if (!(identityContext in this.registry)) {
       throw new InvalidContextException(identityContext)
     }
   }
 
+  @Span()
+  @Counter()
+  @LogExecution()
   async createAccessToken(request: OAuth2Payload): Promise<IdentityProviderAccessTokenInterface> {
     this.validateIdentityContext(request.identityContext)
     const hash = this.createSecretHash(request)
@@ -109,6 +126,9 @@ export class CognitoIdentityProviderService extends AbstractIdentityProviderServ
     }
   }
 
+  @Span()
+  @Counter()
+  @LogExecution()
   async identifyClient(data: Partial<IdentityProviderInterface>): Promise<IdentityProviderInterface> {
     const { identityContext, clientId } = data
     this.validateIdentityContext(identityContext)
@@ -127,6 +147,9 @@ export class CognitoIdentityProviderService extends AbstractIdentityProviderServ
     } as IdentityProviderInterface
   }
 
+  @Span()
+  @Counter()
+  @LogExecution()
   register(strategies: IdentityProviderClientType[]): void {
     strategies.forEach((strategy) => {
       const instance = this.moduleRef.get(strategy, {

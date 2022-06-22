@@ -2,6 +2,8 @@ import { GRANT_STRATEGY_METADATA } from '@app/auth/constants'
 import { OAuth2Response } from '@app/auth/dtos'
 import { Oauth2StrategyNotFoundException } from '@app/auth/errors'
 import { GrantStrategyInterface, OAuth2Payload, StrategyRegistryInterface } from '@app/auth/interfaces'
+import { LogExecution } from '@app/common/decorators'
+import { Counter, Span } from '@metinseylan/nestjs-opentelemetry'
 import { Injectable, Type } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
 
@@ -27,6 +29,10 @@ export class GrantStrategyRegistry
       this.registry[strategyName] = instance
     })
   }
+
+  @Span()
+  @Counter()
+  @LogExecution()
   private validateGrantType(request: OAuth2Payload): boolean {
     if (!(request.grantType in this.registry)) {
       throw new Oauth2StrategyNotFoundException(request.grantType)
@@ -34,12 +40,18 @@ export class GrantStrategyRegistry
     return true
   }
 
+  @Span()
+  @Counter()
+  @LogExecution()
   async validate(request: OAuth2Payload): Promise<boolean> {
     if (this.validateGrantType(request)) {
       return this.registry[request.grantType].validate(request)
     }
   }
 
+  @Span()
+  @Counter()
+  @LogExecution()
   async getOauth2Response(request: OAuth2Payload): Promise<OAuth2Response> {
     if (this.validateGrantType(request)) {
       return this.registry[request.grantType].getOauth2Response(request)
