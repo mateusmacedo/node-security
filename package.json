@@ -1,6 +1,6 @@
 {
   "name": "node-security",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "NodeJS Security",
   "author": "QSaúde<contato@qsaude.com.br",
   "private": true,
