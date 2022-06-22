@@ -6,10 +6,10 @@ import { Module } from '@nestjs/common'
   imports: [
     CommonModule.register({
       configModule: {
-        ignoreEnvFile: process.env.NODE_ENV === 'production',
-        envFilePath: process.env.ENV_FILE_PATH,
-        expandVariables: process.env.NODE_ENV !== 'production',
-        cache: process.env.NODE_ENV === 'production',
+        ignoreEnvFile: ['production', 'staging'].includes(process.env.NODE_ENV),
+        envFilePath: '.env',
+        expandVariables: ['development', 'test'].includes(process.env.NODE_ENV),
+        cache: ['production', 'staging'].includes(process.env.NODE_ENV),
         isGlobal: true
       }
     }),
