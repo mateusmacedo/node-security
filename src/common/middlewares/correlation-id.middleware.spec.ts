@@ -3,6 +3,8 @@ import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Test } from '@nestjs/testing'
 import { NextFunction, Request, Response } from 'express'
 
+import { CORRELATION_ID_KEY } from '../constants/common.constant'
+
 describe('CorrelationIdMiddleware', () => {
   let req: Request
   let res: Response
@@ -27,18 +29,28 @@ describe('CorrelationIdMiddleware', () => {
     it('should generate a correlation id', () => {
       req = getMockReq()
       res = getMockRes().res
+      res.append = function (key, value) {
+        this.header[key] = value
+        return this
+      }
       next = getMockRes().next
       correlationIdMiddleware.use(req, res, next)
-      expect(req.headers['x-correlation-id']).toBeDefined()
+      expect(req.headers[CORRELATION_ID_KEY]).toBeDefined()
+      expect(res.header[CORRELATION_ID_KEY]).toBeDefined()
     })
     it('should preserve a request correlation id', () => {
       req = getMockReq()
-      res = getMockRes().res
+      res.append = function (key, value) {
+        this.header[key] = value
+        return this
+      }
       next = getMockRes().next
-      req.headers['Correlation-Id'] = 'dummy-correlation-id'
+      req.headers['x-correlation-id'] = 'dummy-correlation-id'
       correlationIdMiddleware.use(req, res, next)
       expect(req.headers['x-correlation-id']).toBeDefined()
       expect(req.headers['x-correlation-id']).toBe('dummy-correlation-id')
+      expect(res.header[CORRELATION_ID_KEY]).toBeDefined()
+      expect(res.header['x-correlation-id']).toBe('dummy-correlation-id')
     })
   })
 })
