@@ -20,7 +20,20 @@ describe('LogExecutionDecorator', () => {
       return data
     }
   }
+
+  class DummyErrorClass {
+    @LogExecution()
+    async asyncDummyMethod(data: string) {
+      throw new Error(data)
+    }
+
+    @LogExecution()
+    dummyMethod(data: string) {
+      throw new Error(data)
+    }
+  }
   let sut: DummyClass
+  let sutError: DummyErrorClass
   const mockLogger = createMock<PinoLogger>({
     info: jest.fn().mockReturnValue(undefined)
   })
@@ -33,6 +46,10 @@ describe('LogExecutionDecorator', () => {
         {
           provide: 'DummyClass',
           useClass: DummyClass
+        },
+        {
+          provide: 'DummyErrorClass',
+          useClass: DummyErrorClass
         }
       ]
     })
@@ -40,10 +57,12 @@ describe('LogExecutionDecorator', () => {
       .useValue(mockLogger)
       .compile()
     sut = moduleRef.get<DummyClass>('DummyClass')
+    sutError = moduleRef.get<DummyErrorClass>('DummyErrorClass')
   })
 
   it('should be defined', () => {
     expect(sut).toBeDefined()
+    expect(sutError).toBeDefined()
   })
   describe('LogExecution', () => {
     it('should process logging flow correctly when async', async () => {
@@ -54,6 +73,14 @@ describe('LogExecutionDecorator', () => {
       expect(mockLogger.info).toHaveBeenCalledTimes(1)
       expect(mockLogger.info).toBeCalledWith({ data: ['dummy'], result: 'dummy' })
     })
+    it('should logging error and trows when async execution throws', async () => {
+      const spy = jest.spyOn(sutError, 'asyncDummyMethod')
+      await expect(sutError.asyncDummyMethod('dummy')).rejects.toThrow('dummy')
+      expect(spy).toHaveBeenCalledTimes(1)
+      expect(spy).toHaveBeenCalledWith('dummy')
+      expect(mockLogger.error).toHaveBeenCalledTimes(1)
+      expect(mockLogger.error).toBeCalledWith({ data: ['dummy'], error: new Error('dummy') })
+    })
     it('should process logging flow correctly', () => {
       const spy = jest.spyOn(sut, 'dummyMethod')
       expect(sut.dummyMethod('dummy')).toBe('dummy')
@@ -61,6 +88,19 @@ describe('LogExecutionDecorator', () => {
       expect(spy).toHaveBeenCalledWith('dummy')
       expect(mockLogger.info).toHaveBeenCalledTimes(1)
       expect(mockLogger.info).toBeCalledWith({ data: ['dummy'], result: 'dummy' })
+    })
+    it('should logging error and trows when execution throws', () => {
+      const spy = jest.spyOn(sutError, 'dummyMethod')
+      try {
+        sutError.dummyMethod('dummy')
+      } catch (err) {
+        expect(err).toBeInstanceOf(Error)
+        expect(err.message).toBe('dummy')
+        expect(spy).toHaveBeenCalledTimes(1)
+        expect(spy).toHaveBeenCalledWith('dummy')
+        expect(mockLogger.error).toHaveBeenCalledTimes(1)
+        expect(mockLogger.error).toBeCalledWith({ data: ['dummy'], error: new Error('dummy') })
+      }
     })
   })
 })
