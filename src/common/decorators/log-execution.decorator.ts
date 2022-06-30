@@ -25,7 +25,7 @@ export function LogExecution() {
             return result
           }
         } catch (err) {
-          this.logger.error(err)
+          this.logger.error({ data, error: err })
           throw err
         }
       }
