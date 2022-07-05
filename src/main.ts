@@ -1,6 +1,6 @@
 import { CorrelationIdMiddleware } from '@app/common/middlewares'
 import { MainModule } from '@app/main.module'
-import { ClassSerializerInterceptor, HttpStatus, ValidationPipe, VersioningType } from '@nestjs/common'
+import { ClassSerializerInterceptor, ValidationPipe, VersioningType } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory, Reflector } from '@nestjs/core'
 import { DocumentBuilder, SwaggerDocumentOptions, SwaggerModule } from '@nestjs/swagger'
@@ -15,7 +15,6 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)))
   app.useGlobalPipes(
     new ValidationPipe({
-      errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
       validationError: { target: true, value: true },
       whitelist: true,
       forbidUnknownValues: true,

@@ -7,7 +7,8 @@ export class OAuth2Request {
   @ApiProperty({
     enum: GrantType,
     description: 'The type of grant you are requesting',
-    required: true
+    required: true,
+    name: 'grant_type'
   })
   @Expose({ name: 'grant_type' })
   @IsNotEmpty()
@@ -16,7 +17,8 @@ export class OAuth2Request {
   @ApiProperty({
     type: String,
     description: 'The API Key given by the application',
-    required: true
+    required: true,
+    name: 'client_id'
   })
   @Expose({ name: 'client_id' })
   @IsNotEmpty()
@@ -25,7 +27,8 @@ export class OAuth2Request {
   @ApiProperty({
     type: String,
     description: 'The API Token given by the application',
-    required: true
+    required: true,
+    name: 'client_secret'
   })
   @Expose({ name: 'client_secret' })
   @IsNotEmpty()
@@ -34,7 +37,8 @@ export class OAuth2Request {
   @ApiProperty({
     type: String,
     description: 'The list of the permission that the application requests.',
-    isArray: true
+    isArray: true,
+    name: 'scopes'
   })
   @Expose({ name: 'scopes' })
   @IsNotEmpty()
@@ -42,7 +46,8 @@ export class OAuth2Request {
 
   @ApiProperty({
     type: String,
-    description: 'The refresh token only when grant_type is set to "refresh_token"'
+    description: 'The refresh token only when grant_type is set to "refresh_token"',
+    name: 'refresh_token'
   })
   @Expose({ name: 'refresh_token' })
   @IsOptional()
@@ -51,7 +56,8 @@ export class OAuth2Request {
   @ApiProperty({
     type: Number,
     description:
-      'The expiration time of the assertion, specified as seconds since 00:00:00 UTC, January 1, 1970. 1 hour max after the issued time.'
+      'The expiration time of the assertion, specified as seconds since 00:00:00 UTC, January 1, 1970. 1 hour max after the issued time.',
+    name: 'expires_in'
   })
   @Expose({ name: 'exp' })
   @IsOptional()

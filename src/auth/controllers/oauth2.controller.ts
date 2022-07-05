@@ -2,7 +2,6 @@ import { OAuth2Request, OAuth2Response, UserCredentialsDto } from '@app/auth/dto
 import { IdentityContext } from '@app/auth/enums'
 import { InvalidGrantTypeException } from '@app/auth/errors'
 import { GrantStrategyRegistry } from '@app/auth/services'
-import { LogExecution } from '@app/common/decorators'
 import { Counter, Span } from '@metinseylan/nestjs-opentelemetry'
 import {
   BadRequestException,
@@ -21,7 +20,6 @@ export class Oauth2Controller {
   @Post('token')
   @Span('token')
   @Counter()
-  @LogExecution()
   async token(
     @Headers('x-identity-context') identityContext: IdentityContext,
     @Query() request: OAuth2Request,
