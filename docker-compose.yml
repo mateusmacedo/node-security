@@ -81,10 +81,9 @@ services:
       - /dev/log:/dev/log
       - /var/run/systemd/journal/:/var/run/systemd/journal/
   node-security:
-    image: node-security:dev
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile.dev
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     container_name: node-security
     expose:
       - 3000
@@ -95,8 +94,7 @@ services:
       - 9229:9229
       - 8081:8081
     volumes:
-      - ./src:/usr/src/app/src
-      - ./.env:/usr/src/app/.env
+      - .:/usr/src/app
     environment:
       OTEL_SERVICE_NAME: node-security
       OTEL_EXPORTER_JAEGER_ENDPOINT: http://tempo:14268/api/traces 

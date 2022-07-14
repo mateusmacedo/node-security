@@ -1,6 +1,6 @@
 {
   "name": "node-security",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "NodeJS Security",
   "author": "QSaúde<contato@qsaude.com.br",
   "private": true,
@@ -35,7 +35,7 @@
     "husky": "husky install",
     "snyk": "snyk test",
     "release": "standard-version",
-    "changelog": "standard-version && auto-changelog -p -u --commit-limit false --hide-credit --template changelog-template.hbs",
+    "changelog": "auto-changelog -p -u --commit-limit false --hide-credit --template changelog-template.hbs",
     "changelog:minor": "standard-version --release-as minor && auto-changelog -p -u --commit-limit false --hide-credit --template changelog-template.hbs",
     "changelog:major": "standard-version --release-as major && auto-changelog -p -u --commit-limit false --hide-credit --template changelog-template.hbs",
     "changelog:patch": "standard-version --release-as patch && auto-changelog -p -u --commit-limit false --hide-credit --template changelog-template.hbs",

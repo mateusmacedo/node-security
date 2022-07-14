@@ -1,3 +1,37 @@
+> Refactoring
+
+* refactor(deploy): optimize image build ([`846f411`](https://ssh.dev.azure.com/git@ssh.dev.azure.com:v3/QsaudeDevOps/DigitalWorkPlace/node-security/commit/846f411f7ec41553e9ee3701b027c247d6197fae))
+
+# v0.2.0
+
+## 2022-07-05
+
+> Features
+
+* feat(auth): define and register pf and pj provider ([`c72217b`](https://ssh.dev.azure.com/git@ssh.dev.azure.com:v3/QsaudeDevOps/DigitalWorkPlace/node-security/commit/c72217b56b53684ba4377c3347aa2c7f59d1e2ab))
+
+* feat(logger): ensure log error when execution trows ([`b17c317`](https://ssh.dev.azure.com/git@ssh.dev.azure.com:v3/QsaudeDevOps/DigitalWorkPlace/node-security/commit/b17c3172d8abe17fc990fcc59a3ac2cd5c9df0cf))
+
+> Tests
+
+* test(auth): define and register pf and pj provider ([`c700393`](https://ssh.dev.azure.com/git@ssh.dev.azure.com:v3/QsaudeDevOps/DigitalWorkPlace/node-security/commit/c7003934a75f0a021bb31c1f816a873902e94eda))
+
+* test(logger): ensure log error when execution trows ([`22e1cc0`](https://ssh.dev.azure.com/git@ssh.dev.azure.com:v3/QsaudeDevOps/DigitalWorkPlace/node-security/commit/22e1cc0042d3d8b87404b34d6eb3b591cef4a088))
+
+> Refactoring
+
+* refactor(common): simplify code complexibilty ([`3913293`](https://ssh.dev.azure.com/git@ssh.dev.azure.com:v3/QsaudeDevOps/DigitalWorkPlace/node-security/commit/3913293251c539c8ffd46e036418be69eadfcece))
+
+* refactor(logger): log error on log execution ([`8617afe`](https://ssh.dev.azure.com/git@ssh.dev.azure.com:v3/QsaudeDevOps/DigitalWorkPlace/node-security/commit/8617afe725b6e76a6a6ff0919606fcba0360255c))
+
+* refactor(auth): move files ([`4abb8fc`](https://ssh.dev.azure.com/git@ssh.dev.azure.com:v3/QsaudeDevOps/DigitalWorkPlace/node-security/commit/4abb8fc9748fcae21f0268e036e8bb16e01d5e3a))
+
+> Fixes
+
+* fix(auth): request contracts and swagger decorator ([`7f1f951`](https://ssh.dev.azure.com/git@ssh.dev.azure.com:v3/QsaudeDevOps/DigitalWorkPlace/node-security/commit/7f1f951c402f2b7be8bbbdb3117fc3eccf50b98b))
+
+* fix(main): config module loader ([`ab42cd4`](https://ssh.dev.azure.com/git@ssh.dev.azure.com:v3/QsaudeDevOps/DigitalWorkPlace/node-security/commit/ab42cd408da6144f98640033a3aa90101a15cbe9))
+
 # v0.1.0
 
 ## 2022-06-22
