@@ -7,12 +7,9 @@ module.exports = {
   },
   plugins: ['@typescript-eslint', 'prettier'],
   extends: [
-    'eslint:recommended',
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended',
-    'eslint-config-prettier',
-    'prettier'
+    'plugin:prettier/recommended'
   ],
   root: true,
   env: {
@@ -21,10 +18,14 @@ module.exports = {
   },
   rules: {
     'prettier/prettier': [
-      "error",
+      'error',
       {
-        "endOfLine": "auto"
-      },
+        endOfLine: 'auto',
+        singleQuote: true,
+        trailingComma: 'none',
+        semi: false,
+        printWidth: 120
+      }
     ],
     '@typescript-eslint/strict-boolean-expressions': 'off',
     '@typescript-eslint/consistent-type-definitions': 'off',
@@ -35,4 +36,4 @@ module.exports = {
     '@typescript-eslint/no-namespace': 'off',
     'import/export': 'off'
   }
-};
+}
