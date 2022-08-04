@@ -14,7 +14,7 @@ Antes de começar, verifique se você atendeu aos seguintes requisitos:
 - Você instalou a versão mais recente de `npm`
 - Você tem uma máquina `<Windows / Linux / Mac>`
 
-## ☕ Clonando e Instalando ``<node-security>``
+## ☕ Clonando e Instalando `<node-security>`
 
 Para clonar o repositório `<node-security>`, siga estas etapas:
 
@@ -25,7 +25,7 @@ $ git clone <vcs>/node-security.git
 Para instalar as dependências `<node-security>`, siga estas etapas:
 
 ```bash
-$ npm run install
+$ yarn install
 ```
 
 ## ⚙️ Configurando ambiente `<node-security>`
@@ -33,7 +33,7 @@ $ npm run install
 Executar o script de configurações dos hooks de qualidade
 
 ```bash
-$ npm run prepare
+$ yarn prepare
 ```
 
 Utilizar o arquivo `example.env` como base para a criação dos seguintes arquivos de configuração:
@@ -42,37 +42,37 @@ Utilizar o arquivo `example.env` como base para a criação dos seguintes arquiv
 - `test.env`
 
 > Para as configurações dos módulos definir `src/<module>/configs/<module>.config.ts`, seguindo `src/common/configs/app.config.ts` como base.
- 
+
 ## 🚀 Usando `<node-security>`
 
 Para usar `<node-security>`, siga estas etapas:
 
 ```bash
 # development
-$ npm run start
+$ yarn start
 # watch mode
-$ npm run start:dev
+$ yarn start:dev
 # debug watch mode
-$ npm run start:debug
+$ yarn start:debug
 ```
 
 ## 🧪 Testes
 
 ```bash
 # unit tests
-$ npm run test
+$ yarn test
 # e2e tests
-$ npm run test:e2e
+$ yarn test:e2e
 # test coverage
-$ npm run test:cov
+$ yarn test:cov
 ```
 
 ## ✅ Gerando arquivo de change log
 
 ```bash
-npm run changelog # only changelog
-npm run changelog:minor # x.y.x
-npm run changelog:major # y.x.x
-npm run changelog:patch # x.x.y
-npm run changelog:alpha # x.x.x-alpha.0
+yarn changelog # only changelog
+yarn changelog:minor # x.y.x
+yarn changelog:major # y.x.x
+yarn changelog:patch # x.x.y
+yarn changelog:alpha # x.x.x-alpha.0
 ```

@@ -8,11 +8,11 @@ FROM base as builder
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-RUN npm i -g @nestjs/cli
+RUN npm i --local=global @nestjs/cli yarn
 
 COPY . .
-RUN npm install
-RUN npm run build
+RUN yarn
+RUN yarn build
 
 FROM builder as deps
 
@@ -20,7 +20,7 @@ RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
 RUN rm -rf node_modules
-RUN npm install --omit=dev
+RUN yarn
 
 FROM base as runner
 
