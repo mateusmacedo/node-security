@@ -2,14 +2,14 @@
   "name": "node-security",
   "version": "0.2.0",
   "description": "NodeJS Security",
-  "author": "QSaúde<contato@qsaude.com.br",
+  "author": "MMDATecnologia<mmdatecnologia@gmail.com>",
   "private": true,
   "license": "UNLICENSED",
   "repository": "<vcs>/node-security.git",
   "contributors": [
     {
       "name": "Mateus Macedo Dos Anjos",
-      "email": "mateus.capitani@qsaude.com.br"
+      "email": "macedododosanjosmateus@gmail.com"
     }
   ],
   "scripts": {
